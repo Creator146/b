@@ -1,0 +1,4258 @@
+<!doctype html>
+<!-- REAL_F1_GLB_RENDER_IMPORTMAP_FIXED_V2 -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Mini Racer 3D PRO — Realistic Handling (Menu + Cars + Bots + Currency + Upgrades)</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#000;font-family:system-ui,Segoe UI,Arial}
+  canvas{display:block}
+
+  #hud{
+    position:fixed;left:12px;top:12px;z-index:20;color:#fff;
+    background:rgba(0,0,0,.35);backdrop-filter: blur(8px);
+    border:1px solid rgba(255,255,255,.12);
+    padding:10px 12px;border-radius:16px;min-width:320px;
+    pointer-events:none;
+  }
+  #hud .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  #hud .chip{
+    padding:6px 9px;border-radius:999px;font-weight:900;font-size:12px;
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12)
+  }
+  #hud b{font-weight:950}
+  #hud .muted{opacity:.85;font-size:12px;margin-top:8px;line-height:1.3}
+
+  #btns{
+    position:fixed;left:0;right:0;bottom:16px;display:none;
+    justify-content:center;gap:12px;z-index:30;pointer-events:auto
+  }
+  .pad{
+    width:76px;height:76px;border-radius:22px;
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;
+    user-select:none;touch-action:none;color:#fff;font-size:20px;font-weight:1000
+  }
+  .pad:active{transform:scale(.97)}
+
+  #settings{
+    position:fixed;right:12px;top:12px;z-index:21;color:#fff;
+    background:rgba(0,0,0,.35);backdrop-filter: blur(8px);
+    border:1px solid rgba(255,255,255,.12);
+    padding:10px 12px;border-radius:16px;min-width:260px;
+    pointer-events:auto;
+  }
+  #settings h3{margin:0 0 8px 0;font-size:14px}
+  #settings label{display:flex;align-items:center;gap:8px;font-size:12px;opacity:.92;margin:6px 0}
+  #settings input[type="range"]{width:140px}
+  #settings .mini{opacity:.75;font-size:11px;line-height:1.25;margin-top:6px}
+
+  #menu{
+    position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    color:#fff;pointer-events:auto;
+    background:radial-gradient(1200px 800px at 50% 20%, rgba(80,170,255,.22), rgba(0,0,0,.86));
+  }
+  #menu .panel{
+    width:min(980px, calc(100vw - 24px));
+    max-height:min(720px, calc(100vh - 24px));
+    overflow:auto;
+    background:rgba(0,0,0,.55);backdrop-filter: blur(12px);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:22px;
+    box-shadow:0 20px 80px rgba(0,0,0,.5);
+    padding:16px 16px 18px;
+  }
+  #menu .top{
+    display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  #menu .title{font-size:22px;font-weight:1000;letter-spacing:.2px}
+  #menu .sub{opacity:.9;font-size:12px;line-height:1.35;margin-top:6px}
+  #menu .grid{display:grid;grid-template-columns: 1.05fr .95fr;gap:14px}
+  @media (max-width: 860px){ #menu .grid{grid-template-columns:1fr} }
+  .card{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;
+    padding:14px;
+  }
+  .card h4{margin:0 0 10px 0;font-size:14px}
+  .row2{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{
+    border:0;cursor:pointer;
+    padding:10px 12px;border-radius:14px;
+    font-weight:1000;color:#fff;
+    background:linear-gradient(180deg, rgba(0,229,255,.45), rgba(0,229,255,.22));
+    border:1px solid rgba(0,229,255,.35);
+  }
+  .btn:active{transform:scale(.98)}
+  .btn2{
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.14);
+  }
+  .pill{
+    display:inline-flex;gap:8px;align-items:center;
+    padding:7px 10px;border-radius:999px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.14);
+    font-size:12px;font-weight:900;
+  }
+  .pill small{opacity:.85;font-weight:800}
+  .cars{
+    display:grid;grid-template-columns: repeat(5, minmax(0,1fr));gap:10px;
+  }
+  @media (max-width: 860px){ .cars{grid-template-columns: repeat(3, minmax(0,1fr));} }
+  .carTile{
+    border-radius:16px;padding:10px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    cursor:pointer; user-select:none;
+    display:flex;flex-direction:column;gap:8px;min-height:78px;
+  }
+  .carTile.active{
+    outline:2px solid rgba(0,229,255,.65);
+    box-shadow:0 0 0 4px rgba(0,229,255,.12);
+  }
+  .swatch{height:14px;border-radius:999px;border:1px solid rgba(255,255,255,.18)}
+  .carName{font-weight:1000;font-size:12px}
+  .carNote{opacity:.82;font-size:11px;line-height:1.2}
+  .shopLine{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px;border-radius:14px;
+    background:rgba(0,0,0,.20);
+    border:1px solid rgba(255,255,255,.12);
+    margin-top:8px;
+  }
+  .shopLine b{font-weight:1000}
+  .shopLine .right{display:flex;gap:8px;align-items:center}
+  .miniTxt{opacity:.85;font-size:12px;line-height:1.35}
+  .kbd{padding:2px 6px;border-radius:8px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);font-weight:900;font-size:11px}
+
+
+  #pauseMenu{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);color:white}
+  #pauseMenu .pausePanel{width:min(420px,92vw);border-radius:24px;border:1px solid rgba(255,255,255,.18);background:linear-gradient(180deg,rgba(20,24,32,.96),rgba(5,7,10,.96));padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.45);text-align:center}
+  #pauseMenu .pauseTitle{font-size:34px;font-weight:1000;margin-bottom:8px}
+  #pauseMenu .pauseSub{opacity:.85;font-size:14px;margin-bottom:18px}
+  #pauseMenu .pauseBtns{display:grid;gap:12px}
+
+  #toast{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+    z-index:60;pointer-events:none;
+    background:rgba(0,0,0,.55);backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,.14);
+    color:#fff;border-radius:999px;
+    padding:10px 12px;
+    opacity:0;transition:opacity .18s ease, transform .18s ease;
+    font-weight:950;font-size:12px;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  /* ====== PRO POLISH (Start lights + Results) ====== */
+  #startLights{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+    background:radial-gradient(900px 600px at 50% 35%, rgba(255,255,255,.08), rgba(0,0,0,.82));
+    color:#fff;user-select:none;pointer-events:none;}
+  #startLights .box{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.16);border-radius:22px;
+    padding:16px 18px;backdrop-filter: blur(10px);box-shadow:0 18px 70px rgba(0,0,0,.55);text-align:center;
+    width:min(560px, calc(100vw - 34px));}
+  #startLights .title{font-weight:1000;font-size:18px;letter-spacing:.2px}
+  #startLights .sub{opacity:.9;font-size:12px;margin-top:6px;line-height:1.35}
+  #lightsRow{display:flex;gap:10px;justify-content:center;margin-top:14px}
+  .light{width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.18);box-shadow: inset 0 0 0 2px rgba(0,0,0,.20);}
+  .light.on{background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(255,40,40,1));
+    border-color:rgba(255,80,80,.85);box-shadow:0 0 28px rgba(255,60,60,.55), inset 0 0 0 2px rgba(0,0,0,.15);}
+  .light.go{background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(0,255,120,1));
+    border-color:rgba(0,255,160,.85);box-shadow:0 0 30px rgba(0,255,140,.55), inset 0 0 0 2px rgba(0,0,0,.12);}
+  #startText{margin-top:12px;font-weight:1000;letter-spacing:.3px;font-size:22px;text-shadow:0 8px 25px rgba(0,0,0,.55);}
+
+  #results{position:fixed;inset:0;z-index:85;display:none;align-items:center;justify-content:center;
+    background:radial-gradient(900px 600px at 50% 25%, rgba(0,229,255,.10), rgba(0,0,0,.86));
+    color:#fff;pointer-events:auto;}
+  #results .panel{width:min(760px, calc(100vw - 24px));max-height:min(84vh, 760px);overflow:auto;
+    background:rgba(0,0,0,.55);backdrop-filter: blur(12px);border:1px solid rgba(255,255,255,.14);
+    border-radius:22px;box-shadow:0 20px 90px rgba(0,0,0,.6);padding:16px 16px 18px;}
+  #results .hdr{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px;}
+  #results .hdr .t{font-size:20px;font-weight:1000}
+  #results .hdr .s{opacity:.9;font-size:12px;line-height:1.35;margin-top:6px}
+  #results .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width: 760px){ #results .grid{grid-template-columns:1fr} }
+  #results .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px;}
+  #results .row{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
+  #results .row b{font-weight:1000}
+  #results .big{font-size:34px;font-weight:1000;letter-spacing:.2px;margin-top:6px}
+  #results .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;
+    background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.14);font-size:12px;font-weight:950;}
+  #results .btnRow{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px}
+  #results .btnWide{min-width:160px}
+
+
+  #nitroUI{
+    position:fixed; top:10px; left:50%; transform:translateX(-50%);
+    z-index:70; pointer-events:none; display:flex; flex-direction:column; gap:8px;
+    width:min(520px, calc(100vw - 24px));
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,.45));
+  }
+  .nbar{
+    height:14px; border-radius:999px; overflow:hidden;
+    background:rgba(0,0,0,.55);
+    border:1px solid rgba(255,255,255,.20);
+    backdrop-filter: blur(8px);
+    position:relative;
+  }
+  .nbar .fill{
+    height:100%; width:0%;
+    border-radius:999px;
+    transition: width .08s linear;
+  }
+  .nbar .label{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between;
+    padding:0 10px; font-size:11px; font-weight:950; color:#fff;
+    text-shadow:0 2px 10px rgba(0,0,0,.6);
+    opacity:.92;
+  }
+  .fill.ultra{ background:linear-gradient(90deg, rgba(0,255,255,1), rgba(0,160,255,1)); }
+  .fill.normal{ background:linear-gradient(90deg, rgba(255,180,0,1), rgba(255,90,0,1)); }
+
+
+/* ===== GLOBAL CHAT ADD-ON (added, nothing deleted) ===== */
+#globalChat{
+  position:fixed;
+  right:12px;
+  bottom:12px;
+  z-index:120;
+  width:320px;
+  max-width:calc(100vw - 24px);
+  color:#fff;
+  background:rgba(0,0,0,.58);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:18px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 18px 60px rgba(0,0,0,.45);
+  overflow:hidden;
+  font-family:system-ui,Segoe UI,Arial;
+}
+#globalChat.minimized #chatBody{display:none}
+#chatHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 12px;
+  background:rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+#chatHead b{font-size:13px;font-weight:1000}
+#chatHead small{opacity:.75;font-size:11px}
+#chatToggle{
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  border-radius:10px;
+  padding:5px 8px;
+  font-weight:1000;
+}
+#chatMessages{
+  height:190px;
+  overflow-y:auto;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  scrollbar-width:thin;
+}
+.chatMsg{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  padding:7px 8px;
+  word-break:break-word;
+  line-height:1.25;
+}
+.chatMsg .name{
+  font-size:11px;
+  font-weight:1000;
+  opacity:.95;
+  margin-bottom:3px;
+}
+.chatMsg .txt{font-size:12px;opacity:.95}
+.chatSys{
+  opacity:.75;
+  font-size:11px;
+  text-align:center;
+  padding:4px 0;
+}
+#chatForm{
+  display:flex;
+  gap:6px;
+  padding:10px;
+  border-top:1px solid rgba(255,255,255,.12);
+}
+#chatName{
+  width:78px;
+}
+#chatInput{
+  flex:1;
+  min-width:0;
+}
+#chatName,#chatInput{
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.35);
+  color:#fff;
+  border-radius:12px;
+  padding:9px 9px;
+  outline:none;
+  font-weight:800;
+}
+#chatSend{
+  border:1px solid rgba(0,229,255,.35);
+  background:linear-gradient(180deg, rgba(0,229,255,.45), rgba(0,229,255,.22));
+  color:#fff;
+  border-radius:12px;
+  padding:9px 10px;
+  font-weight:1000;
+  cursor:pointer;
+}
+#chatStatus{
+  padding:0 10px 9px;
+  opacity:.72;
+  font-size:11px;
+}
+@media (max-width: 720px){
+  #globalChat{
+    left:12px;
+    right:12px;
+    bottom:104px;
+    width:auto;
+  }
+  #chatMessages{height:150px}
+}
+
+
+/* ===== PLAYER PROFILE + FRIENDS ADD-ON (added, nothing deleted) ===== */
+#profilePanel{
+  position:fixed;
+  left:12px;
+  bottom:12px;
+  z-index:125;
+  width:340px;
+  max-width:calc(100vw - 24px);
+  color:#fff;
+  background:rgba(0,0,0,.58);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:18px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 18px 60px rgba(0,0,0,.45);
+  overflow:hidden;
+  font-family:system-ui,Segoe UI,Arial;
+}
+#profilePanel.minimized #profileBody{display:none}
+#profileHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 12px;
+  background:rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+#profileHead b{font-size:13px;font-weight:1000}
+#profileHead small{opacity:.75;font-size:11px}
+#profileToggle{
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  border-radius:10px;
+  padding:5px 8px;
+  font-weight:1000;
+}
+#profileBody{padding:10px;display:flex;flex-direction:column;gap:8px}
+.profileCard{
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:9px;
+}
+.profileRow{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px}
+.profileLabel{opacity:.72;font-size:11px}
+.profileValue{font-size:12px;font-weight:1000;word-break:break-word;text-align:right}
+#profileNameInput,#friendIdInput{
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.35);
+  color:#fff;
+  border-radius:12px;
+  padding:9px 9px;
+  outline:none;
+  font-weight:800;
+  min-width:0;
+}
+#profileNameInput{width:128px}
+#friendIdInput{flex:1}
+.profileBtn{
+  border:1px solid rgba(0,229,255,.35);
+  background:linear-gradient(180deg, rgba(0,229,255,.45), rgba(0,229,255,.22));
+  color:#fff;
+  border-radius:12px;
+  padding:9px 10px;
+  font-weight:1000;
+  cursor:pointer;
+}
+.profileBtn.secondary{
+  background:rgba(255,255,255,.10);
+  border-color:rgba(255,255,255,.16);
+}
+#friendsList,#requestsList{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:130px;
+  overflow-y:auto;
+}
+.friendItem{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:center;
+  background:rgba(0,0,0,.23);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  padding:7px 8px;
+  font-size:12px;
+}
+.friendItem b{font-weight:1000}
+.friendItem small{opacity:.72}
+.friendActions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.friendActions button{
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  border-radius:9px;
+  padding:5px 7px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:11px;
+}
+#profileStatus{
+  opacity:.75;
+  font-size:11px;
+  line-height:1.25;
+}
+@media (max-width:720px){
+  #profilePanel{
+    left:12px;
+    right:12px;
+    bottom:280px;
+    width:auto;
+  }
+}
+
+
+/* ===== AUTO MATCHMAKING FINAL ADD-ON (added, nothing deleted) ===== */
+#mpServer, #mpRoom, #mpCreate, #mpJoin, #mpLeave{display:none !important;}
+#autoMatchBox{
+  display:flex;flex-direction:column;gap:8px;margin-top:8px;padding:10px;
+  border-radius:14px;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.12);
+}
+#autoMatchBtn{
+  width:100%;border:1px solid rgba(0,229,255,.42);
+  background:linear-gradient(180deg, rgba(0,229,255,.55), rgba(0,229,255,.24));
+  color:#fff;border-radius:14px;padding:12px 14px;font-weight:1000;cursor:pointer;
+}
+#autoMatchBtn:active{transform:scale(.99)}
+#autoMatchState{font-size:12px;opacity:.9;line-height:1.3}
+#autoMatchState b{font-weight:1000}
+
+  .carTile.locked{opacity:.62;filter:saturate(.55)}
+  .carTile .lockTxt{font-size:11px;font-weight:1000;color:#ffd36b}
+  .titleSelect{
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(0,0,0,.35);
+    color:#fff;
+    border-radius:12px;
+    padding:9px 9px;
+    outline:none;
+    font-weight:900;
+  }
+  .raceInvite{
+    margin-top:6px;
+    background:rgba(0,229,255,.10);
+    border:1px solid rgba(0,229,255,.24);
+    border-radius:12px;
+    padding:8px;
+    font-size:12px;
+  }
+
+/* ===== FULL SCREEN SOCIAL TABS (space-saving UI) ===== */
+.socialMenuBtns{
+  width:100%;
+  justify-content:flex-end;
+  margin-top:6px;
+}
+.socialOpenBtn{
+  min-width:126px;
+}
+body:not(.social-tab-open) #globalChat,
+body:not(.social-tab-open) #profilePanel{
+  display:none !important;
+}
+#globalChat.socialFull,
+#profilePanel.socialFull{
+  display:block !important;
+  position:fixed !important;
+  inset:0 !important;
+  width:auto !important;
+  max-width:none !important;
+  height:auto !important;
+  max-height:none !important;
+  z-index:500 !important;
+  border-radius:0 !important;
+  border:0 !important;
+  background:radial-gradient(900px 600px at 50% 10%, rgba(0,229,255,.14), rgba(0,0,0,.92)) !important;
+  box-shadow:none !important;
+  color:#fff;
+}
+#globalChat.socialFull #chatHead,
+#profilePanel.socialFull #profileHead{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:14px 18px;
+  background:rgba(0,0,0,.62);
+  backdrop-filter:blur(12px);
+}
+#globalChat.socialFull #chatHead b,
+#profilePanel.socialFull #profileHead b{
+  font-size:20px;
+}
+#globalChat.socialFull #chatToggle,
+#profilePanel.socialFull #profileToggle{
+  min-width:86px;
+  padding:10px 14px;
+  border-radius:14px;
+}
+#globalChat.socialFull #chatBody,
+#profilePanel.socialFull #profileBody{
+  display:flex !important;
+  flex-direction:column;
+  gap:12px;
+  width:min(920px, calc(100vw - 24px));
+  margin:0 auto;
+  padding:16px 0 24px;
+  max-height:calc(100vh - 58px);
+  overflow:auto;
+}
+#globalChat.socialFull #chatMessages{
+  height:calc(100vh - 190px);
+  min-height:320px;
+}
+#globalChat.socialFull #chatForm{
+  position:sticky;
+  bottom:0;
+  background:rgba(0,0,0,.48);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+}
+#profilePanel.socialFull .profileCard{
+  display:none;
+}
+#profilePanel.socialFull.social-profile .profileCard.social-profile-card,
+#profilePanel.socialFull.social-friends .profileCard.social-friends-card,
+#profilePanel.socialFull.social-clans .profileCard.social-clans-card,
+#profilePanel.socialFull.social-leaderboards .profileCard.social-leaderboards-card{
+  display:block;
+}
+#profilePanel.socialFull #profileStatus{
+  display:block;
+  width:min(920px, calc(100vw - 24px));
+  margin:0 auto 10px;
+}
+#profilePanel.socialFull #friendsList,
+#profilePanel.socialFull #requestsList,
+#profilePanel.socialFull #clanMembersList,
+#profilePanel.socialFull #clanInvitesList,
+#profilePanel.socialFull #leaderboardCR,
+#profilePanel.socialFull #leaderboardBest{
+  max-height:none;
+}
+#profilePanel.socialFull .friendItem{
+  padding:11px 12px;
+  font-size:14px;
+}
+@media (max-width:720px){
+  .socialMenuBtns{justify-content:stretch}
+  .socialOpenBtn{flex:1; min-width:138px}
+  #globalChat.socialFull #chatBody,
+  #profilePanel.socialFull #profileBody{
+    width:calc(100vw - 18px);
+    padding-top:10px;
+  }
+  #globalChat.socialFull #chatMessages{
+    min-height:260px;
+    height:calc(100vh - 205px);
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div id="nitroUI">
+  <div class="nbar"><div class="fill ultra" id="ultraFill"></div><div class="label"><span>ULTRA (Perfect line)</span><span id="ultraPct">0%</span></div></div>
+  <div class="nbar"><div class="fill normal" id="normalFill"></div><div class="label"><span>NITRO (Good line)</span><span id="normalPct">0%</span></div></div>
+</div>
+
+<div id="hud">
+  <div class="row">
+    <div class="chip">Speed <b><span id="speed">0</span></b> km/h</div>
+    <div class="chip">Lap <b><span id="lap">1</span></b>/<span id="laps">3</span></div>
+    <div class="chip">Time <b><span id="time">0.00</span></b>s</div>
+    <div class="chip">Best <b><span id="best">--</span></b></div>
+    <div class="chip">View <b><span id="view">1</span></b></div>
+    <div class="chip">CR <b><span id="cr">0</span></b></div>
+    <div class="chip">WIDE TRACK RESTORED</div>
+  </div>
+  <div class="muted">
+    PC: <span class="kbd">A</span>=Left, <span class="kbd">D</span>=Right, <span class="kbd">W</span>=Go • <span class="kbd">Space</span>=brake • <span class="kbd">R</span>=reset • <span class="kbd">ESC</span>=pause • <span class="kbd">1</span>/<span class="kbd">2</span>=Camera<br/>
+    Mobile: buttons + optional tilt steering • realistic grip, braking, weight and traction limits
+  </div>
+</div>
+
+<div id="settings">
+  <h3>Settings</h3>
+  <label><input id="tilt" type="checkbox" /> Tilt steering (mobile)</label>
+  <label><input id="sound" type="checkbox" checked /> Engine sound</label>
+  <label>Camera smooth <input id="cams" type="range" min="0" max="100" value="75" /></label>
+  <label>Quality <input id="qual" type="range" min="50" max="200" value="130" /></label>
+  <div class="mini">If it lags, lower “Quality”.</div>
+</div>
+
+<div id="menu">
+  <div class="panel">
+    <div class="top">
+      <div>
+        <div class="title">Mini Racer 3D PRO — Realistic Handling</div>
+        <div class="sub">
+          Choose car + bots + upgrades, then press <b>Play</b>.<br/>
+          Camera: <span class="kbd">1</span> chase • <span class="kbd">2</span> cockpit (real F1 cockpit view).<br/>
+          Earn currency (CR) by driving + finishing laps. Upgrade your car anytime. Realistic mode rewards braking early, smooth steering and clean racing lines.
+        </div>
+      </div>
+      <div class="row2">
+        <span class="pill">CR <b id="menuCR">0</b></span>
+        <button class="btn btn2" id="btnResetSave">Reset Save</button>
+        <button class="btn" id="btnPlay">Play</button>
+      </div>
+      <div class="row2 socialMenuBtns">
+        <button class="btn btn2 socialOpenBtn" data-social-tab="profile" type="button">Profile / Titles</button>
+        <button class="btn btn2 socialOpenBtn" data-social-tab="friends" type="button">Friends</button>
+        <button class="btn btn2 socialOpenBtn" data-social-tab="clans" type="button">Clans</button>
+        <button class="btn btn2 socialOpenBtn" data-social-tab="leaderboards" type="button">Leaderboards</button>
+        <button class="btn btn2 socialOpenBtn" data-social-tab="chat" type="button">Global Chat</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h4>Select Car</h4>
+        <div class="cars" id="cars"></div>
+        <div class="miniTxt" style="margin-top:10px;opacity:.9">
+          Each team is just color/style (same base physics), upgrades affect your chosen car.
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Race Setup</h4>
+        <h4 style="margin-top:14px">Multiplayer (LAN)</h4>
+        <div class="miniTxt">Auto matchmaking: no room PIN. Click Multiplayer Play and wait for players.</div>
+        <!-- ===== AUTO MATCHMAKING FINAL ADD-ON (added, nothing deleted) ===== -->
+        <div id="autoMatchBox">
+          <button class="btn" id="autoMatchBtn" type="button">Multiplayer Play</button>
+          <div id="autoMatchState">
+            Press Multiplayer Play. It waits for a 2nd player, starts at 2 players, and lets others join until 5 players.
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Server URL</b>
+            <div class="miniTxt">Render auto-connects with <span class="kbd">wss://your-app.onrender.com</span></div>
+          </div>
+          <div class="right" style="flex-wrap:wrap;justify-content:flex-end">
+            <input id="mpServer" class="btn btn2" style="padding:9px 10px;border-radius:12px;width:260px;max-width:60vw;text-align:left" value="auto" />
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Room PIN</b>
+            <div class="miniTxt">Create a room or join your friend’s PIN.</div>
+          </div>
+          <div class="right" style="flex-wrap:wrap;justify-content:flex-end">
+            <input id="mpRoom" class="btn btn2" style="padding:9px 10px;border-radius:12px;width:140px;max-width:40vw;text-align:left" placeholder="ABCD12" />
+            <button class="btn btn2" id="mpCreate">Create</button>
+            <button class="btn btn2" id="mpJoin">Join</button>
+            <button class="btn btn2" id="mpLeave">Leave</button>
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Status</b>
+            <div class="miniTxt" id="mpHint">Not connected</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Room</small> <b id="mpRoomLbl">—</b></span>
+            <span class="pill"><small>Players</small> <b id="mpPlayers">1</b></span>
+          </div>
+        </div>
+
+
+        <div class="shopLine">
+          <div>
+            <b>Bots</b><div class="miniTxt">Choose how many AI cars race with you.</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Count</small> <b id="botCountLabel">6</b></span>
+            <input id="bots" type="range" min="0" max="12" value="6" />
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Laps</b><div class="miniTxt">Finish laps to earn a big CR bonus.</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Total</small> <b id="lapsLabel">3</b></span>
+            <input id="lapsSet" type="range" min="1" max="10" value="3" />
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Race Mode</b><div class="miniTxt">Quick Race or a 5‑race Championship.</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Mode</small> <b id="modeLabel">Quick</b></span>
+            <input id="modeSel" type="range" min="0" max="1" value="0" />
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Difficulty</b><div class="miniTxt">Bots get smarter + faster.</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Lvl</small> <b id="diffLabel">3</b></span>
+            <input id="diff" type="range" min="1" max="5" value="3" />
+          </div>
+        </div>
+
+
+        <h4 style="margin-top:14px">Upgrades</h4>
+        <div class="miniTxt">Spend CR to improve your car. (No pay-to-win bots: they also vary, some good, some bad.)</div>
+
+        <div class="shopLine">
+          <div>
+            <b>Top Speed</b> <span class="pill"><small>Lvl</small> <b id="uSpeedLvl">0</b></span>
+            <div class="miniTxt">Higher max speed (km/h).</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Cost</small> <b id="uSpeedCost">200</b></span>
+            <button class="btn btn2" id="buySpeed">Buy</button>
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Acceleration</b> <span class="pill"><small>Lvl</small> <b id="uAccelLvl">0</b></span>
+            <div class="miniTxt">Faster pull out of corners.</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Cost</small> <b id="uAccelCost">160</b></span>
+            <button class="btn btn2" id="buyAccel">Buy</button>
+          </div>
+        </div>
+
+        <div class="shopLine">
+          <div>
+            <b>Grip</b> <span class="pill"><small>Lvl</small> <b id="uGripLvl">0</b></span>
+            <div class="miniTxt">More control, less sliding.</div>
+          </div>
+          <div class="right">
+            <span class="pill"><small>Cost</small> <b id="uGripCost">180</b></span>
+            <button class="btn btn2" id="buyGrip">Buy</button>
+          </div>
+        </div>
+
+        <div class="miniTxt" style="margin-top:12px">
+          Tip: If bots feel too hard, lower bot count and upgrade a bit.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="btns">
+  <div class="pad" id="L">◀</div>
+  <div class="pad" id="G">▲</div>
+  <div class="pad" id="B">■</div>
+  <div class="pad" id="R">▶</div>
+</div>
+
+
+<div id="pauseMenu">
+  <div class="pausePanel">
+    <div class="pauseTitle">PAUSED</div>
+    <div class="pauseSub">Race is frozen. Continue or quit back to the main menu.</div>
+    <div class="pauseBtns">
+      <button class="btn btnWide" id="btnPauseContinue">Continue Race</button>
+      <button class="btn btn2 btnWide" id="btnPauseQuit">Quit To Menu</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast">Saved!</div>
+<div id="startLights">
+  <div class="box">
+    <div class="title">Starting Lights</div>
+    <div class="sub">Hold steady… when lights go out, GO!</div>
+    <div id="lightsRow">
+      <div class="light" id="L1"></div><div class="light" id="L2"></div><div class="light" id="L3"></div><div class="light" id="L4"></div><div class="light" id="L5"></div>
+    </div>
+    <div id="startText">READY</div>
+  </div>
+</div>
+
+<div id="results">
+  <div class="panel">
+    <div class="hdr">
+      <div>
+        <div class="t" id="resTitle">Race Results</div>
+        <div class="s" id="resSub">Nice driving.</div>
+      </div>
+      <div class="badge">CR <b id="resCR">0</b></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="badge">Finish Position</div>
+        <div class="big" id="resPos">--</div>
+        <div class="row"><span>Total Time</span><b id="resTime">--</b></div>
+        <div class="row"><span>Best Time</span><b id="resBest">--</b></div>
+        <div class="row"><span>Clean Race</span><b id="resClean">--</b></div>
+      </div>
+
+      <div class="card">
+        <div class="badge">Rewards</div>
+        <div class="row"><span>Finish Reward</span><b id="rFinish">0</b></div>
+        <div class="row"><span>Position Bonus</span><b id="rPos">0</b></div>
+        <div class="row"><span>Clean Bonus</span><b id="rClean">0</b></div>
+        <div class="row"><span>Championship Pts</span><b id="rChamp">0</b></div>
+        <div class="row" style="margin-top:10px;border-top:1px solid rgba(255,255,255,.10);padding-top:10px">
+          <span>Total Earned</span><b id="rTotal">0</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="badge">Mode</div>
+      <div class="row"><span>Race Mode</span><b id="resMode">Quick Race</b></div>
+      <div class="row"><span>Championship</span><b id="resChamp">—</b></div>
+    </div>
+
+    <div class="btnRow">
+      <button class="btn btn2 btnWide" id="btnResMenu">Menu</button>
+      <button class="btn btnWide" id="btnResNext">Race Again</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- ===== PLAYER PROFILE + FRIENDS ADD-ON (added, nothing deleted) ===== -->
+<div id="profilePanel">
+  <div id="profileHead">
+    <div>
+      <b>Player Profile</b>
+      <small id="profileOnline">loading...</small>
+    </div>
+    <button id="profileToggle" type="button">−</button>
+  </div>
+  <div id="profileBody">
+    <div class="profileCard">
+      <div class="profileRow">
+        <span class="profileLabel">Your Name</span>
+        <span>
+          <input id="profileNameInput" maxlength="14" />
+          <button id="profileSaveName" class="profileBtn secondary" type="button">Save</button>
+        </span>
+      </div>
+      <div class="profileRow">
+        <span class="profileLabel">Your Player ID</span>
+        <span class="profileValue" id="playerIdText">---</span>
+      </div>
+      <div class="profileRow">
+        <span class="profileLabel">Public Profile</span>
+        <span class="profileValue" id="publicProfileText">Visible</span>
+      </div>
+      <div class="profileRow">
+        <span class="profileLabel">Title</span>
+        <select id="playerTitleSelect" class="titleSelect"></select>
+      </div>
+      <div class="profileRow">
+        <button id="buyNextTitle" class="profileBtn secondary" type="button">Unlock Next Title</button>
+      </div>
+      <div class="profileRow">
+        <button id="copyPlayerId" class="profileBtn secondary" type="button">Copy ID</button>
+        <button id="refreshProfile" class="profileBtn secondary" type="button">Refresh</button>
+      </div>
+    </div>
+
+    <div class="profileCard">
+      <div class="profileLabel">Add Friend by Player ID</div>
+      <div class="profileRow">
+        <input id="friendIdInput" maxlength="18" placeholder="Example: RC-AB12CD34" />
+        <button id="addFriendBtn" class="profileBtn" type="button">Add</button>
+      </div>
+    </div>
+
+    <div class="profileCard">
+      <div class="profileLabel">Friend Requests</div>
+      <div id="requestsList"><div class="friendItem"><small>No requests yet.</small></div></div>
+    </div>
+
+    <div class="profileCard">
+      <div class="profileLabel">Friends</div>
+      <div id="friendsList"><div class="friendItem"><small>No friends yet.</small></div></div>
+    </div>
+
+
+    <div class="profileCard">
+      <div class="profileLabel">Clan System</div>
+      <div class="miniTxt">Create a clan for <b>3,000 CR</b>, invite friends, and race together.</div>
+      <div class="profileRow">
+        <input id="clanNameInput" maxlength="20" placeholder="Clan name" style="flex:1" />
+        <button id="createClanBtn" class="profileBtn" type="button">Create 3K</button>
+      </div>
+      <div class="profileRow">
+        <span class="profileLabel">Your Clan</span>
+        <span class="profileValue" id="clanInfoText">No clan</span>
+      </div>
+      <div id="clanMembersList"><div class="friendItem"><small>No clan members yet.</small></div></div>
+      <div class="profileRow">
+        <input id="clanInviteInput" maxlength="18" placeholder="Friend Player ID" style="flex:1" />
+        <button id="inviteClanBtn" class="profileBtn secondary" type="button">Invite</button>
+      </div>
+      <div id="clanInvitesList"><div class="friendItem"><small>No clan invites.</small></div></div>
+      <button id="leaveClanBtn" class="profileBtn secondary" type="button">Leave Clan</button>
+    </div>
+
+    <div class="profileCard">
+      <div class="profileLabel">Global Leaderboards</div>
+      <div class="miniTxt">Top players by CR and fastest best lap/time.</div>
+      <div class="profileRow">
+        <button id="refreshLeaderboards" class="profileBtn secondary" type="button">Refresh Boards</button>
+      </div>
+      <div class="profileLabel">Most CR</div>
+      <div id="leaderboardCR"><div class="friendItem"><small>No scores yet.</small></div></div>
+      <div class="profileLabel" style="margin-top:8px">Fastest Best Time</div>
+      <div id="leaderboardBest"><div class="friendItem"><small>No times yet.</small></div></div>
+    </div>
+
+    <div id="profileStatus">Each browser gets a random permanent ID automatically.</div>
+  </div>
+</div>
+
+<!-- ===== GLOBAL CHAT ADD-ON (added, nothing deleted) ===== -->
+<div id="globalChat">
+  <div id="chatHead">
+    <div>
+      <b>Global Chat</b>
+      <small id="chatOnline">connecting...</small>
+    </div>
+    <button id="chatToggle" type="button">−</button>
+  </div>
+  <div id="chatBody">
+    <div id="chatMessages">
+      <div class="chatSys">Global chat loads when the server is online.</div>
+    </div>
+    <form id="chatForm">
+      <input id="chatName" maxlength="14" placeholder="Name" autocomplete="nickname" />
+      <input id="chatInput" maxlength="140" placeholder="Say something..." autocomplete="off" />
+      <button id="chatSend" type="submit">Send</button>
+    </form>
+    <div id="chatStatus">Chat is public. Be respectful.</div>
+  </div>
+</div>
+
+<!-- Self-contained bundle: works from file://, localhost, and Render -->
+<script src="three-bundle.js"></script>
+
+<script>
+
+
+/* ===== GLOBAL CHAT ADD-ON (added, nothing deleted) ===== */
+const GLOBAL_CHAT = {
+  socket:null,
+  connected:false,
+  reconnectTimer:null
+};
+
+const chatBox = document.getElementById("globalChat");
+const chatToggle = document.getElementById("chatToggle");
+const chatMessages = document.getElementById("chatMessages");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const chatName = document.getElementById("chatName");
+const chatOnline = document.getElementById("chatOnline");
+const chatStatus = document.getElementById("chatStatus");
+
+function chatEscape(s){
+  return String(s || "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+}
+function chatAddSystem(text){
+  if(!chatMessages) return;
+  const d=document.createElement("div");
+  d.className="chatSys";
+  d.textContent=text;
+  chatMessages.appendChild(d);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+}
+function chatAddMessage(name,text){
+  if(!chatMessages) return;
+  const d=document.createElement("div");
+  d.className="chatMsg";
+  d.innerHTML = `<div class="name">${chatEscape(name)}</div><div class="txt">${chatEscape(text)}</div>`;
+  chatMessages.appendChild(d);
+  while(chatMessages.children.length > 60) chatMessages.removeChild(chatMessages.firstChild);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+}
+function chatUrl(){
+  const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+  return protocol + location.host;
+}
+function connectGlobalChat(){
+  if(!("WebSocket" in window)) {
+    chatAddSystem("Your browser does not support WebSocket chat.");
+    return;
+  }
+  try{
+    if(GLOBAL_CHAT.socket) GLOBAL_CHAT.socket.close();
+    const ws = new WebSocket(chatUrl());
+    GLOBAL_CHAT.socket = ws;
+    if(chatOnline) chatOnline.textContent = "connecting...";
+    if(chatStatus) chatStatus.textContent = "Connecting to global chat...";
+
+    ws.addEventListener("open", ()=>{
+      GLOBAL_CHAT.connected = true;
+      if(chatOnline) chatOnline.textContent = "online";
+      if(chatStatus) chatStatus.textContent = "Connected to global chat.";
+      chatAddSystem("Connected.");
+    });
+
+    ws.addEventListener("message", (ev)=>{
+      let msg;
+      try{ msg = JSON.parse(ev.data); }catch{ return; }
+      if(msg.t === "chat_history" && Array.isArray(msg.messages)){
+        chatMessages.innerHTML = "";
+        for(const m of msg.messages) chatAddMessage(m.name, m.text);
+        if(!msg.messages.length) chatAddSystem("No messages yet. Say hi.");
+      }
+      if(msg.t === "chat"){
+        chatAddMessage(msg.name, msg.text);
+      }
+      if(msg.t === "chat_online"){
+        if(chatOnline) chatOnline.textContent = `${msg.count || 1} online`;
+      }
+      if(msg.t === "chat_error"){
+        chatAddSystem(msg.message || "Message blocked.");
+      }
+
+      if(msg.t === "profile_ok"){
+        if(profileOnline) profileOnline.textContent = `${msg.online || 1} online`;
+        setProfileStatus("Public profile online.");
+      }
+      if(msg.t === "friends_data"){
+        renderFriends(msg);
+        renderRequests(msg);
+        if(profileOnline) profileOnline.textContent = `${msg.online || 1} online`;
+      }
+      if(msg.t === "friend_notice"){
+        setProfileStatus(msg.message || "Friend update.");
+        refreshFriends();
+      }
+
+      if(msg.t === "clan_data"){
+        renderClanData(msg);
+      }
+      if(msg.t === "clan_notice"){
+        setProfileStatus(msg.message || "Clan update.");
+      }
+      if(msg.t === "clan_invite_notice"){
+        setProfileStatus(`${msg.fromName || "A friend"} invited you to clan ${msg.clan?.name || ""}.`);
+      }
+      if(msg.t === "leaderboard_data"){
+        renderLeaderboards(msg);
+      }
+      if(msg.t === "friend_race_status"){
+        renderFriends({friends: msg.friends || []});
+        if(msg.friends && msg.friends.some(f=>f.racing)) setProfileStatus("Your friend is racing 🏁");
+      }
+      if(msg.t === "race_invite"){
+        const ok = confirm((msg.fromName || "A friend") + " invited you to race. Join now?");
+        if(ok){
+          sendProfileMsg({t:"join_match_id", from:PLAYER_PROFILE.id, matchId:msg.matchId});
+          setProfileStatus("Joining race invite...");
+        }else{
+          setProfileStatus("Race invite ignored.");
+        }
+      }
+      if(msg.t === "joined_friend_race"){
+        setProfileStatus("Joined friend race.");
+        if(autoMatchBtn) autoMatchBtn.textContent = "Leave Multiplayer";
+        if(menu && menu.style.display !== "none") btnPlay.click();
+      }
+
+    });
+
+    ws.addEventListener("close", ()=>{
+      GLOBAL_CHAT.connected = false;
+      if(chatOnline) chatOnline.textContent = "offline";
+      if(chatStatus) chatStatus.textContent = "Chat disconnected. Reconnecting...";
+      clearTimeout(GLOBAL_CHAT.reconnectTimer);
+      GLOBAL_CHAT.reconnectTimer = setTimeout(connectGlobalChat, 1800);
+    });
+
+    ws.addEventListener("error", ()=>{
+      if(chatStatus) chatStatus.textContent = "Chat connection error.";
+    });
+  }catch(e){
+    chatAddSystem("Could not connect to chat.");
+  }
+}
+if(chatToggle){
+  chatToggle.addEventListener("click", ()=>{
+    if(chatBox.classList.contains("socialFull")) return closeSocialTab();
+    chatBox.classList.toggle("minimized");
+    chatToggle.textContent = chatBox.classList.contains("minimized") ? "+" : "−";
+  });
+}
+if(chatName){
+  const savedName = localStorage.getItem("MINI_RACER_CHAT_NAME") || ("Racer" + Math.floor(Math.random()*999));
+  chatName.value = savedName;
+  chatName.addEventListener("change", ()=>{
+    localStorage.setItem("MINI_RACER_CHAT_NAME", chatName.value.trim().slice(0,14) || "Racer");
+  });
+}
+if(chatForm){
+  chatForm.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const name = (chatName.value || "Racer").trim().slice(0,14);
+    const text = (chatInput.value || "").trim().slice(0,140);
+    if(!text) return;
+    localStorage.setItem("MINI_RACER_CHAT_NAME", name);
+    if(!GLOBAL_CHAT.socket || GLOBAL_CHAT.socket.readyState !== WebSocket.OPEN){
+      chatAddSystem("Chat is offline. Try again in a second.");
+      return;
+    }
+    GLOBAL_CHAT.socket.send(JSON.stringify({t:"chat", name, text}));
+    chatInput.value="";
+  });
+}
+connectGlobalChat();
+
+/* ===== PLAYER PROFILE + FRIENDS ADD-ON (added, nothing deleted) ===== */
+const PLAYER_PROFILE_KEY = "MINI_RACER_PLAYER_PROFILE_V1";
+function makePlayerId(){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "RC-";
+  for(let i=0;i<8;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+function loadPlayerProfile(){
+  try{
+    const old = JSON.parse(localStorage.getItem(PLAYER_PROFILE_KEY) || "null");
+    if(old && old.id) return old;
+  }catch{}
+  const p = {
+    id: makePlayerId(),
+    name: "Racer" + Math.floor(Math.random()*9999),
+    createdAt: Date.now(),
+    public: true,
+    friends: []
+  };
+  localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(p));
+  return p;
+}
+let PLAYER_PROFILE = loadPlayerProfile();
+
+const profilePanel = document.getElementById("profilePanel");
+const profileToggle = document.getElementById("profileToggle");
+const profileOnline = document.getElementById("profileOnline");
+const playerIdText = document.getElementById("playerIdText");
+const profileNameInput = document.getElementById("profileNameInput");
+const profileSaveName = document.getElementById("profileSaveName");
+const copyPlayerId = document.getElementById("copyPlayerId");
+const refreshProfile = document.getElementById("refreshProfile");
+const friendIdInput = document.getElementById("friendIdInput");
+const addFriendBtn = document.getElementById("addFriendBtn");
+const friendsList = document.getElementById("friendsList");
+const requestsList = document.getElementById("requestsList");
+const profileStatus = document.getElementById("profileStatus");
+
+/* ===== FULL SCREEN SOCIAL TABS (space-saving UI) ===== */
+const SOCIAL_TAB_TITLES = {
+  profile: "Player Profile / Titles",
+  friends: "Friends",
+  clans: "Clans",
+  leaderboards: "Global Leaderboards",
+  chat: "Global Chat"
+};
+
+function markSocialCards(){
+  const cards = [...document.querySelectorAll("#profileBody .profileCard")];
+  cards.forEach(card=>{
+    const txt = (card.textContent || "").toLowerCase();
+    if(txt.includes("your name") || txt.includes("public profile") || txt.includes("title")) card.classList.add("social-profile-card");
+    if(txt.includes("add friend") || txt.includes("friend requests") || txt.trim() === "friends" || txt.includes("friends")) card.classList.add("social-friends-card");
+    if(txt.includes("clan system") || txt.includes("your clan") || txt.includes("clan invites")) card.classList.add("social-clans-card");
+    if(txt.includes("global leaderboards") || txt.includes("most cr") || txt.includes("fastest best time")) card.classList.add("social-leaderboards-card");
+  });
+}
+
+function closeSocialTab(){
+  document.body.classList.remove("social-tab-open");
+  if(chatBox){
+    chatBox.classList.remove("socialFull");
+    chatBox.classList.remove("minimized");
+  }
+  if(profilePanel){
+    profilePanel.classList.remove("socialFull","social-profile","social-friends","social-clans","social-leaderboards","minimized");
+  }
+  if(chatToggle) chatToggle.textContent = "−";
+  if(profileToggle) profileToggle.textContent = "−";
+  if(menu) menu.style.display = "flex";
+}
+
+function openSocialTab(tab){
+  markSocialCards();
+  document.body.classList.add("social-tab-open");
+  if(menu) menu.style.display = "none";
+
+  if(tab === "chat"){
+    if(chatBox){
+      chatBox.classList.add("socialFull");
+      chatBox.classList.remove("minimized");
+    }
+    if(profilePanel) profilePanel.classList.remove("socialFull","social-profile","social-friends","social-clans","social-leaderboards");
+    if(chatToggle) chatToggle.textContent = "Back";
+    if(chatBox?.querySelector("#chatHead b")) chatBox.querySelector("#chatHead b").textContent = SOCIAL_TAB_TITLES.chat;
+    return;
+  }
+
+  if(chatBox) chatBox.classList.remove("socialFull");
+  if(profilePanel){
+    profilePanel.classList.add("socialFull","social-" + tab);
+    profilePanel.classList.remove("minimized");
+  }
+  if(profileToggle) profileToggle.textContent = "Back";
+  const titleEl = profilePanel?.querySelector("#profileHead b");
+  if(titleEl) titleEl.textContent = SOCIAL_TAB_TITLES[tab] || "Menu";
+  if(tab === "leaderboards" && typeof refreshLeaderboardsNow === "function") refreshLeaderboardsNow();
+  if((tab === "friends" || tab === "clans") && typeof refreshFriends === "function") refreshFriends();
+}
+
+document.querySelectorAll(".socialOpenBtn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    openSocialTab(btn.getAttribute("data-social-tab"));
+  });
+});
+
+const playerTitleSelect = document.getElementById("playerTitleSelect");
+const buyNextTitle = document.getElementById("buyNextTitle");
+const clanNameInput = document.getElementById("clanNameInput");
+const createClanBtn = document.getElementById("createClanBtn");
+const clanInfoText = document.getElementById("clanInfoText");
+const clanMembersList = document.getElementById("clanMembersList");
+const clanInviteInput = document.getElementById("clanInviteInput");
+const inviteClanBtn = document.getElementById("inviteClanBtn");
+const clanInvitesList = document.getElementById("clanInvitesList");
+const leaveClanBtn = document.getElementById("leaveClanBtn");
+const refreshLeaderboards = document.getElementById("refreshLeaderboards");
+const leaderboardCR = document.getElementById("leaderboardCR");
+const leaderboardBest = document.getElementById("leaderboardBest");
+
+const FRIENDS_NET = { ws:null, online:false };
+
+function savePlayerProfile(){
+  localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(PLAYER_PROFILE));
+}
+function setProfileStatus(t){
+  if(profileStatus) profileStatus.textContent = t;
+}
+function renderLocalProfile(){
+  if(playerIdText) playerIdText.textContent = PLAYER_PROFILE.id;
+  if(profileNameInput) profileNameInput.value = PLAYER_PROFILE.name || "Racer";
+}
+function safeWsUrl(){
+  const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+  return protocol + location.host;
+}
+function sendProfileMsg(obj){
+  const ws = FRIENDS_NET.ws || (typeof GLOBAL_CHAT !== "undefined" ? GLOBAL_CHAT.socket : null);
+  if(ws && ws.readyState === WebSocket.OPEN){
+    ws.send(JSON.stringify(obj));
+    return true;
+  }
+  setProfileStatus("Offline. Wait for server connection.");
+  return false;
+}
+function registerProfile(){
+  sendProfileMsg({
+    t:"profile_register",
+    id:PLAYER_PROFILE.id,
+    name:PLAYER_PROFILE.name + (typeof SAVE !== "undefined" && SAVE.title ? " • " + SAVE.title : ""),
+    public:true,
+    title: (typeof SAVE !== "undefined" && SAVE.title) ? SAVE.title : "Rookie Racer",
+    friends:PLAYER_PROFILE.friends || []
+  });
+}
+function renderFriends(data){
+  if(!friendsList) return;
+  const friends = data?.friends || [];
+  PLAYER_PROFILE.friends = friends.map(f => f.id || f).filter(Boolean);
+  savePlayerProfile();
+  friendsList.innerHTML = "";
+  if(!friends.length){
+    friendsList.innerHTML = `<div class="friendItem"><small>No friends yet.</small></div>`;
+    return;
+  }
+  for(const f of friends){
+    const row = document.createElement("div");
+    row.className = "friendItem";
+    const racingTxt = f.racing ? " • your friend is racing 🏁" : "";
+    row.innerHTML = `
+      <div><b>${chatEscape ? chatEscape(f.name || "Racer") : (f.name || "Racer")}</b><br><small>${f.id} • ${f.online ? "online" : "offline"}${racingTxt}</small></div>
+      <div class="friendActions">
+        <button data-invite="${f.id}">Invite</button>
+        <button data-joinfriend="${f.id}" ${f.racing ? "" : "disabled"}>Join Race</button>
+        <button data-remove="${f.id}">Remove</button>
+      </div>
+    `;
+    friendsList.appendChild(row);
+  }
+  friendsList.querySelectorAll("[data-invite]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      sendProfileMsg({t:"friend_invite_race", from:PLAYER_PROFILE.id, target:btn.getAttribute("data-invite")});
+      setProfileStatus("Race invite sent.");
+    });
+  });
+  friendsList.querySelectorAll("[data-joinfriend]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      sendProfileMsg({t:"join_friend_race", from:PLAYER_PROFILE.id, target:btn.getAttribute("data-joinfriend")});
+      setProfileStatus("Joining friend race...");
+    });
+  });
+  friendsList.querySelectorAll("[data-remove]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      sendProfileMsg({t:"friend_remove", from:PLAYER_PROFILE.id, target:btn.getAttribute("data-remove")});
+    });
+  });
+}
+function renderRequests(data){
+  if(!requestsList) return;
+  const reqs = data?.requests || [];
+  requestsList.innerHTML = "";
+  if(!reqs.length){
+    requestsList.innerHTML = `<div class="friendItem"><small>No requests yet.</small></div>`;
+    return;
+  }
+  for(const r of reqs){
+    const row = document.createElement("div");
+    row.className = "friendItem";
+    row.innerHTML = `
+      <div><b>${chatEscape ? chatEscape(r.name || "Racer") : (r.name || "Racer")}</b><br><small>${r.id}</small></div>
+      <div class="friendActions">
+        <button data-accept="${r.id}">Accept</button>
+        <button data-decline="${r.id}">Decline</button>
+      </div>
+    `;
+    requestsList.appendChild(row);
+  }
+  requestsList.querySelectorAll("[data-accept]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      sendProfileMsg({t:"friend_accept", from:PLAYER_PROFILE.id, target:btn.getAttribute("data-accept")});
+    });
+  });
+  requestsList.querySelectorAll("[data-decline]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      sendProfileMsg({t:"friend_decline", from:PLAYER_PROFILE.id, target:btn.getAttribute("data-decline")});
+    });
+  });
+}
+function refreshFriends(){
+  sendProfileMsg({t:"friends_get", id:PLAYER_PROFILE.id});
+}
+
+function submitLeaderboard(){
+  if(typeof SAVE === "undefined") return;
+  sendProfileMsg({
+    t:"leaderboard_submit",
+    id:PLAYER_PROFILE.id,
+    name:(PLAYER_PROFILE.name || "Racer") + (SAVE.title ? " • " + SAVE.title : ""),
+    title:SAVE.title || "Rookie Racer",
+    cr:Math.floor(SAVE.cr || 0),
+    best:SAVE.bestTime || null
+  });
+}
+function renderClanData(data){
+  if(!clanInfoText) return;
+  const clan = data?.clan;
+  if(!clan){
+    clanInfoText.textContent = "No clan";
+    if(clanMembersList) clanMembersList.innerHTML = `<div class="friendItem"><small>No clan members yet.</small></div>`;
+  } else {
+    clanInfoText.textContent = `${clan.name} (${clan.members.length} members)`;
+    if(clanMembersList){
+      clanMembersList.innerHTML = "";
+      for(const mid of clan.members){
+        const row=document.createElement("div");
+        row.className="friendItem";
+        row.innerHTML = `<div><b>${mid}</b><br><small>${mid===clan.owner ? "Owner" : "Member"}</small></div>`;
+        clanMembersList.appendChild(row);
+      }
+    }
+  }
+  const invites = data?.invites || [];
+  if(clanInvitesList){
+    clanInvitesList.innerHTML = "";
+    if(!invites.length) clanInvitesList.innerHTML = `<div class="friendItem"><small>No clan invites.</small></div>`;
+    for(const c of invites){
+      const row=document.createElement("div");
+      row.className="friendItem";
+      row.innerHTML = `<div><b>${chatEscape(c.name)}</b><br><small>${c.members.length} members</small></div><div class="friendActions"><button data-clan-accept="${c.id}">Join</button></div>`;
+      clanInvitesList.appendChild(row);
+    }
+    clanInvitesList.querySelectorAll("[data-clan-accept]").forEach(btn=>{
+      btn.addEventListener("click", ()=>sendProfileMsg({t:"clan_accept", from:PLAYER_PROFILE.id, clanId:btn.getAttribute("data-clan-accept")}));
+    });
+  }
+}
+function renderLeaderboards(data){
+  function rowHtml(r,i,kind){
+    const value = kind==="cr" ? `${Math.floor(r.cr||0)} CR` : `${Number(r.best||0).toFixed(2)}s`;
+    return `<div class="friendItem"><div><b>#${i+1} ${chatEscape(r.name || "Racer")}</b><br><small>${chatEscape(r.title || "Rookie Racer")}${r.clanId ? " • "+r.clanId : ""}</small></div><b>${value}</b></div>`;
+  }
+  if(leaderboardCR){
+    const rows=data?.cr || [];
+    leaderboardCR.innerHTML = rows.length ? rows.map((r,i)=>rowHtml(r,i,"cr")).join("") : `<div class="friendItem"><small>No CR scores yet.</small></div>`;
+  }
+  if(leaderboardBest){
+    const rows=data?.best || [];
+    leaderboardBest.innerHTML = rows.length ? rows.map((r,i)=>rowHtml(r,i,"best")).join("") : `<div class="friendItem"><small>No best times yet.</small></div>`;
+  }
+}
+function initProfileFriendSystem(){
+  renderLocalProfile();
+  setTimeout(registerProfile, 700);
+  setTimeout(refreshFriends, 1000);
+  setTimeout(submitLeaderboard, 1400);
+  setInterval(()=>{ registerProfile(); refreshFriends(); submitLeaderboard(); sendProfileMsg({t:"leaderboard_get"}); }, 8000);
+}
+if(profileToggle){
+  profileToggle.addEventListener("click", ()=>{
+    if(profilePanel.classList.contains("socialFull")) return closeSocialTab();
+    profilePanel.classList.toggle("minimized");
+    profileToggle.textContent = profilePanel.classList.contains("minimized") ? "+" : "−";
+  });
+}
+if(profileSaveName){
+  profileSaveName.addEventListener("click", ()=>{
+    PLAYER_PROFILE.name = (profileNameInput.value || "Racer").trim().slice(0,14) || "Racer";
+    savePlayerProfile();
+    registerProfile();
+    setProfileStatus("Profile name saved.");
+    if(typeof chatName !== "undefined" && chatName) chatName.value = PLAYER_PROFILE.name;
+  });
+}
+if(copyPlayerId){
+  copyPlayerId.addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(PLAYER_PROFILE.id);
+      setProfileStatus("Player ID copied.");
+    }catch{
+      setProfileStatus("Your ID: " + PLAYER_PROFILE.id);
+    }
+  });
+}
+if(refreshProfile){
+  refreshProfile.addEventListener("click", ()=>{
+    registerProfile();
+    refreshFriends();
+    setProfileStatus("Profile refreshed.");
+  });
+}
+if(addFriendBtn){
+  addFriendBtn.addEventListener("click", ()=>{
+    const target = (friendIdInput.value || "").trim().toUpperCase();
+    if(!target || target === PLAYER_PROFILE.id) return setProfileStatus("Type another player's ID.");
+    sendProfileMsg({t:"friend_request", from:PLAYER_PROFILE.id, target});
+    friendIdInput.value = "";
+  });
+}
+
+if(createClanBtn){
+  createClanBtn.addEventListener("click", ()=>{
+    const name=(clanNameInput.value || "").trim().slice(0,20);
+    if(!name) return setProfileStatus("Type a clan name first.");
+    if((SAVE.cr || 0) < 3000) return setProfileStatus("You need 3,000 CR to create a clan.");
+    SAVE.cr -= 3000;
+    saveNow("Clan fee paid");
+    sendProfileMsg({t:"clan_create", from:PLAYER_PROFILE.id, name});
+    submitLeaderboard();
+  });
+}
+if(inviteClanBtn){
+  inviteClanBtn.addEventListener("click", ()=>{
+    const target=(clanInviteInput.value || "").trim().toUpperCase();
+    if(!target || target === PLAYER_PROFILE.id) return setProfileStatus("Type a friend's Player ID.");
+    sendProfileMsg({t:"clan_invite", from:PLAYER_PROFILE.id, target});
+    clanInviteInput.value="";
+  });
+}
+if(leaveClanBtn){
+  leaveClanBtn.addEventListener("click", ()=>sendProfileMsg({t:"clan_leave", from:PLAYER_PROFILE.id}));
+}
+if(refreshLeaderboards){
+  refreshLeaderboards.addEventListener("click", ()=>{
+    submitLeaderboard();
+    sendProfileMsg({t:"leaderboard_get"});
+  });
+}
+
+initProfileFriendSystem();
+if(playerTitleSelect){
+  playerTitleSelect.addEventListener("change", ()=>{
+    SAVE.title = playerTitleSelect.value || "Rookie Racer";
+    saveNow("Title equipped");
+    registerProfile();
+  });
+}
+if(buyNextTitle){
+  buyNextTitle.addEventListener("click", ()=>{
+    const owned = new Set(SAVE.unlockedTitles || ["Rookie Racer"]);
+    const next = PLAYER_TITLES.find(t=>!owned.has(t.name));
+    if(!next) return setProfileStatus("All titles unlocked.");
+    if(SAVE.cr < next.cost) return setProfileStatus(`Need ${next.cost} CR to unlock ${next.name}.`);
+    SAVE.cr -= next.cost;
+    SAVE.unlockedTitles = [...owned, next.name];
+    SAVE.title = next.name;
+    saveNow("Title unlocked");
+    rebuildMenuUI();
+    renderLocalProfile();
+    registerProfile();
+  });
+}
+
+
+
+/* =========================
+   Core helpers + DOM
+========================= */
+const $ = (id)=>document.getElementById(id);
+const elSpeed=$("speed"), elLap=$("lap"), elLaps=$("laps"), elTime=$("time"), elBest=$("best"), elView=$("view");
+const elCR=$("cr"), menuCR=$("menuCR"), toast=$("toast");
+const tiltBox=$("tilt"), soundBox=$("sound"), camSmooth=$("cams"), qual=$("qual");
+const menu=$("menu"), btnPlay=$("btnPlay"), btnResetSave=$("btnResetSave");
+const carsWrap=$("cars");
+const botsRange=$("bots"), botCountLabel=$("botCountLabel");
+const lapsSet=$("lapsSet"), lapsLabel=$("lapsLabel");
+const uSpeedLvl=$("uSpeedLvl"), uAccelLvl=$("uAccelLvl"), uGripLvl=$("uGripLvl");
+const uSpeedCost=$("uSpeedCost"), uAccelCost=$("uAccelCost"), uGripCost=$("uGripCost");
+const buySpeed=$("buySpeed"), buyAccel=$("buyAccel"), buyGrip=$("buyGrip");
+
+// Multiplayer UI
+const mpServer=$("mpServer"), mpRoom=$("mpRoom");
+const mpCreate=$("mpCreate"), mpJoin=$("mpJoin"), mpLeave=$("mpLeave");
+const mpHint=$("mpHint"), mpRoomLbl=$("mpRoomLbl"), mpPlayers=$("mpPlayers");
+const autoMatchBtn=$("autoMatchBtn"), autoMatchState=$("autoMatchState");
+
+const startLights=$("startLights"), startText=$("startText");
+const Ls=[$("L1"),$("L2"),$("L3"),$("L4"),$("L5")];
+const results=$("results");
+const resTitle=$("resTitle"), resSub=$("resSub"), resCR=$("resCR");
+const resPos=$("resPos"), resTime=$("resTime"), resBest=$("resBest"), resClean=$("resClean");
+const rFinish=$("rFinish"), rPos=$("rPos"), rClean=$("rClean"), rChamp=$("rChamp"), rTotal=$("rTotal");
+const resMode=$("resMode"), resChamp=$("resChamp");
+const btnResMenu=$("btnResMenu"), btnResNext=$("btnResNext");
+const modeSel=$("modeSel"), modeLabel=$("modeLabel");
+const diff=$("diff"), diffLabel=$("diffLabel");
+
+
+const isMobile = matchMedia("(pointer:coarse)").matches;
+if(isMobile) $("btns").style.display="flex";
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const TAU=Math.PI*2;
+const rng=(a,b)=>a+Math.random()*(b-a);
+const v3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
+
+function toastMsg(t){
+  toast.textContent=t;
+  toast.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t=setTimeout(()=>toast.classList.remove("show"), 900);
+}
+
+/* =========================
+   Save data (CR + upgrades + car)
+========================= */
+const SAVE_KEY="MINI_RACER_GT7_SAVE_V1";
+
+const TEAM_LIST = [
+  {id:"redbull",  name:"Red Bull",  color:0x0b1a3a, note:"Navy • fast vibes"},
+  {id:"ferrari",  name:"Ferrari",   color:0xd61b2a, note:"Red • classic"},
+  {id:"mclaren",  name:"McLaren",   color:0xff7a18, note:"Papaya • loud"},
+  {id:"mercedes", name:"Mercedes",  color:0xbfc7cf, note:"Silver • clean"},
+  {id:"aston",    name:"Aston",     color:0x0b6b3a, note:"Green • sleek"},
+  {id:"alpine",   name:"Alpine",    color:0x1b6cff, note:"Blue • sharp"},
+  {id:"williams", name:"Williams",  color:0x1d6aff, note:"Blue • solid"},
+  {id:"haas",     name:"Haas",      color:0xe9eef7, note:"White • simple"},
+  {id:"sauber",   name:"Sauber",    color:0x00ff7a, note:"Neon green • wild"},
+  {id:"rb",       name:"RB",        color:0x1c2a6a, note:"Blue • quick"}
+];
+
+const CAR_UNLOCKS = {
+  ferrari:0, haas:0, williams:0,
+  redbull:900, mclaren:700, mercedes:800, aston:650, alpine:550, sauber:450, rb:500
+};
+const PLAYER_TITLES = [
+  {name:"Rookie Racer", cost:0},
+  {name:"Street Champion", cost:10000},
+  {name:"Drift King", cost:25000},
+  {name:"Online Legend", cost:50000},
+  {name:"Mini Racer GOAT", cost:100000}
+];
+function carUnlocked(id){
+  return (SAVE.unlockedCars || []).includes(id) || (CAR_UNLOCKS[id] || 0) === 0;
+}
+function titleUnlocked(name){
+  const t = PLAYER_TITLES.find(x=>x.name===name);
+  return !t || t.cost === 0 || SAVE.cr >= t.cost || (SAVE.unlockedTitles || []).includes(name);
+}
+
+
+const DEFAULT_SAVE = {
+  cr: 0,
+  teamId: "ferrari",
+  upgrades: { speed:0, accel:0, grip:0 },
+  bestTime: null,
+  unlockedCars: ["ferrari","haas","williams"],
+  unlockedTitles: ["Rookie Racer"],
+  title: "Rookie Racer"
+};
+
+let SAVE = loadSave();
+function loadSave(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw) return structuredClone(DEFAULT_SAVE);
+    const obj=JSON.parse(raw);
+    const s=structuredClone(DEFAULT_SAVE);
+    if(typeof obj?.cr==="number") s.cr=obj.cr;
+    if(typeof obj?.teamId==="string") s.teamId=obj.teamId;
+    if(obj?.upgrades){
+      s.upgrades.speed = obj.upgrades.speed|0;
+      s.upgrades.accel = obj.upgrades.accel|0;
+      s.upgrades.grip  = obj.upgrades.grip|0;
+    }
+    if(typeof obj?.bestTime==="number") s.bestTime=obj.bestTime;
+    if(Array.isArray(obj?.unlockedCars)) s.unlockedCars = [...new Set([...s.unlockedCars, ...obj.unlockedCars])];
+    if(Array.isArray(obj?.unlockedTitles)) s.unlockedTitles = obj.unlockedTitles;
+    if(typeof obj?.title==="string") s.title = obj.title;
+    return s;
+  }catch{
+    return structuredClone(DEFAULT_SAVE);
+  }
+}
+function saveNow(msgText="Saved!"){
+  localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE));
+  menuCR.textContent = String(Math.floor(SAVE.cr));
+  elCR.textContent = String(Math.floor(SAVE.cr));
+  toastMsg(msgText);
+  try{ submitLeaderboard(); }catch{}
+}
+function resetSave(){
+  SAVE = structuredClone(DEFAULT_SAVE);
+  saveNow("Save reset");
+  rebuildMenuUI();
+}
+
+function rebuildMenuUI(){
+  // cars
+  carsWrap.innerHTML="";
+  for(const t of TEAM_LIST){
+    const locked = !carUnlocked(t.id);
+    const cost = CAR_UNLOCKS[t.id] || 0;
+    const tile=document.createElement("div");
+    tile.className="carTile"+(t.id===SAVE.teamId?" active":"")+(locked?" locked":"");
+    tile.innerHTML=`
+      <div class="swatch" style="background:#${t.color.toString(16).padStart(6,"0")}"></div>
+      <div class="carName">${locked ? "🔒 " : ""}${t.name}</div>
+      <div class="carNote">${t.note}</div>
+      ${locked ? `<div class="lockTxt">Unlock: ${cost} CR</div>` : ""}
+    `;
+    tile.addEventListener("pointerdown", ()=>{
+      if(locked){
+        if(SAVE.cr < cost) return toastMsg("Need " + cost + " CR to unlock");
+        SAVE.cr -= cost;
+        SAVE.unlockedCars = [...new Set([...(SAVE.unlockedCars || []), t.id])];
+        SAVE.teamId=t.id;
+        saveNow("Car unlocked");
+      }else{
+        SAVE.teamId=t.id;
+        saveNow("Car selected");
+      }
+      rebuildMenuUI();
+      applyCarPaint();
+    });
+    carsWrap.appendChild(tile);
+  }
+
+  // CR + upgrades
+  menuCR.textContent=String(Math.floor(SAVE.cr));
+  elCR.textContent=String(Math.floor(SAVE.cr));
+
+  uSpeedLvl.textContent=String(SAVE.upgrades.speed);
+  uAccelLvl.textContent=String(SAVE.upgrades.accel);
+  uGripLvl.textContent =String(SAVE.upgrades.grip);
+
+  // simple escalating costs
+  const cSpeed = 200 + SAVE.upgrades.speed*140;
+  const cAccel = 160 + SAVE.upgrades.accel*120;
+  const cGrip  = 180 + SAVE.upgrades.grip *130;
+
+  uSpeedCost.textContent=String(cSpeed);
+  uAccelCost.textContent=String(cAccel);
+  uGripCost.textContent =String(cGrip);
+
+  buySpeed.disabled = SAVE.cr < cSpeed;
+  buyAccel.disabled = SAVE.cr < cAccel;
+  buyGrip.disabled  = SAVE.cr < cGrip;
+
+  // race setup labels
+  botCountLabel.textContent=String(botsRange.value|0);
+  lapsLabel.textContent=String(lapsSet.value|0);
+  diffLabel.textContent=String(diff.value|0);
+  modeLabel.textContent = (modeSel.value|0)===0 ? "Quick" : "Champ";
+  if(playerTitleSelect){
+    const current = SAVE.title || "Rookie Racer";
+    playerTitleSelect.innerHTML = "";
+    for(const t of PLAYER_TITLES){
+      const owned = t.cost === 0 || (SAVE.unlockedTitles || []).includes(t.name);
+      const opt = document.createElement("option");
+      opt.value = t.name;
+      opt.textContent = owned ? t.name : `${t.name} 🔒 ${t.cost} CR`;
+      opt.disabled = !owned;
+      playerTitleSelect.appendChild(opt);
+    }
+    playerTitleSelect.value = current;
+  }
+}
+rebuildMenuUI();
+botsRange.addEventListener("input", ()=> botCountLabel.textContent=String(botsRange.value|0));
+lapsSet.addEventListener("input", ()=> lapsLabel.textContent=String(lapsSet.value|0));
+modeSel.addEventListener("input", ()=>{ modeLabel.textContent=((modeSel.value|0)===0?"Quick":"Champ"); });
+diff.addEventListener("input", ()=>{ diffLabel.textContent=String(diff.value|0); });
+
+buySpeed.addEventListener("pointerdown", ()=>{
+  const cost = 200 + SAVE.upgrades.speed*140;
+  if(SAVE.cr < cost) return toastMsg("Not enough CR");
+  SAVE.cr -= cost;
+  SAVE.upgrades.speed++;
+  saveNow("Upgraded speed");
+  rebuildMenuUI();
+});
+buyAccel.addEventListener("pointerdown", ()=>{
+  const cost = 160 + SAVE.upgrades.accel*120;
+  if(SAVE.cr < cost) return toastMsg("Not enough CR");
+  SAVE.cr -= cost;
+  SAVE.upgrades.accel++;
+  saveNow("Upgraded accel");
+  rebuildMenuUI();
+});
+buyGrip.addEventListener("pointerdown", ()=>{
+  const cost = 180 + SAVE.upgrades.grip*130;
+  if(SAVE.cr < cost) return toastMsg("Not enough CR");
+  SAVE.cr -= cost;
+  SAVE.upgrades.grip++;
+  saveNow("Upgraded grip");
+  rebuildMenuUI();
+});
+
+btnResetSave.addEventListener("pointerdown", ()=>{
+  if(confirm("Reset save? (CR + upgrades + car)")) resetSave();
+});
+
+/* =========================
+   Input
+========================= */
+const keys=new Map();
+addEventListener("keydown",(e)=>{ keys.set(e.code,true); });
+addEventListener("keyup",(e)=>{ keys.set(e.code,false); });
+
+const touch={L:false,R:false,G:false,B:false};
+function bindPad(id,key){
+  const el=$(id);
+  const down=()=>touch[key]=true;
+  const up=()=>touch[key]=false;
+  el.addEventListener("pointerdown",(e)=>{e.preventDefault(); down();});
+  addEventListener("pointerup",up);
+  addEventListener("pointercancel",up);
+  addEventListener("pointerleave",up);
+  addEventListener("pointerout",up);
+}
+if(isMobile){
+  bindPad("L","L"); bindPad("R","R"); bindPad("G","G"); bindPad("B","B");
+}
+let tiltSteer=0;
+if(isMobile){
+  addEventListener("deviceorientation",(e)=>{
+    const g=(e.gamma ?? 0);
+    tiltSteer = clamp(g/25, -1, 1);
+  }, {passive:true});
+}
+function getInput(){
+  const up = keys.get("KeyW")||keys.get("ArrowUp")||touch.G;
+  const down = keys.get("KeyS")||keys.get("ArrowDown");
+  const left = keys.get("KeyA")||keys.get("ArrowLeft")||touch.L;
+  const right= keys.get("KeyD")||keys.get("ArrowRight")||touch.R;
+  const brake= keys.get("Space")||touch.B;
+
+  let steer = (left?-1:0) + (right?1:0);
+  if(isMobile && tiltBox.checked) steer = clamp(steer + tiltSteer, -1, 1);
+    const rainGripMul = raining ? 0.92 : 1.0;
+  const rainOffMul  = raining ? 0.965 : 1.0;
+  return {up,down,steer,brake};
+}
+
+/* =========================
+   Three.js renderer + scene
+========================= */
+const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:"high-performance" });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0xbfe7ff, 0.00135);
+renderer.setClearColor(0xbfe7ff, 1);
+
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 8000);
+camera.position.set(0, 7, 14);
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.25);
+sun.position.set(170, 230, 90);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.near=1;
+sun.shadow.camera.far=1600;
+sun.shadow.camera.left=-420;
+sun.shadow.camera.right=420;
+sun.shadow.camera.top=420;
+sun.shadow.camera.bottom=-420;
+sun.shadow.bias = -0.00025;
+sun.shadow.normalBias = 0.02;
+scene.add(sun);
+
+// better ambient (sky/ground tint)
+const hemi = new THREE.HemisphereLight(0xbfe7ff, 0x2b2a2a, 0.65);
+scene.add(hemi);
+scene.add(new THREE.AmbientLight(0xffffff, 0.12));
+
+
+
+/* =========================
+   Multiplayer (LAN) — WebSocket relay (server.js)
+   - Create/Join room PIN
+   - Sends player state ~20Hz
+   - Renders other players as ghost cars
+========================= */
+const mp = {
+  ws: null,
+  id: null,
+  room: null,
+  matchId: null,
+  matchmaking: false,
+  matchStarted: false,
+  peers: new Map(), // id -> {mesh, targetPos, targetYaw}
+  sendAcc: 0,
+  connected: false,
+};
+
+const mpGroup = new THREE.Group();
+scene.add(mpGroup);
+
+function mpSetHint(t){ if(mpHint) mpHint.textContent = t; }
+function mpSetRoom(r){ if(mpRoomLbl) mpRoomLbl.textContent = r ? r : "—"; }
+function mpSetPlayers(n){ if(mpPlayers) mpPlayers.textContent = String(n|0); }
+function autoMatchText(t){
+  if(autoMatchState) autoMatchState.innerHTML = t;
+  mpSetHint(String(t).replace(/<[^>]*>/g, ""));
+}
+
+function mpDefaultServer(){
+  // RENDER FIX: connect back to the same Render app URL. Do not use :8787 on Render.
+  try{
+    const h = location.hostname;
+    if(!h || h === "localhost" || h === "127.0.0.1") return "ws://localhost:3000";
+    const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+    return protocol + location.host;
+  }catch{ return "ws://localhost:3000"; }
+}
+if(mpServer) mpServer.value = mpDefaultServer();
+
+function mpResetPeers(){
+  mpGroup.clear();
+  mp.peers.clear();
+  mpSetPlayers(1);
+}
+
+function mpClose(){
+  try{ mp.ws?.close(); }catch{}
+  mp.ws = null;
+  mp.connected = false;
+  mp.room = null;
+  mp.matchId = null;
+  mp.matchmaking = false;
+  mp.matchStarted = false;
+  mpSetRoom(null);
+  if(autoMatchBtn) autoMatchBtn.textContent = "Multiplayer Play";
+  mpSetHint("Not connected");
+  mpResetPeers();
+}
+
+function makeGhostCar(color=0xffffff){
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({color, roughness:0.30, metalness:0.25, transparent:true, opacity:0.72});
+  const dark = new THREE.MeshStandardMaterial({color:0x101318, roughness:0.9, metalness:0.08});
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.42, 5.5), mat);
+  chassis.position.set(0,0.70,0.1);
+  chassis.castShadow=true;
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(2.7,0.10,0.6), dark);
+  wing.position.set(0,1.05,3.0);
+  wing.castShadow=true;
+  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.95,0.25,1.6), mat);
+  nose.position.set(0,0.68,-2.7);
+  nose.castShadow=true;
+  g.add(chassis, wing, nose);
+
+  const tireGeo = new THREE.CylinderGeometry(0.55,0.55,0.58,16);
+  const tireMat = new THREE.MeshStandardMaterial({color:0x0b0e14, roughness:0.85, metalness:0.1});
+  const wheelPos = [[-1.35,-1.85],[ 1.35,-1.85],[-1.45, 1.75],[ 1.45, 1.75]];
+  for(const [x,z] of wheelPos){
+    const w = new THREE.Mesh(tireGeo, tireMat);
+    w.rotation.z=Math.PI/2;
+    w.position.set(x,0.60,z);
+    w.castShadow=true;
+    g.add(w);
+  }
+  return g;
+}
+
+function mpUpsertPeer(id, color){
+  let p = mp.peers.get(id);
+  if(p) return p;
+  const mesh = makeGhostCar(color);
+  mpGroup.add(mesh);
+  p = {mesh, targetPos: new THREE.Vector3(0,-999,0), targetYaw:0};
+  mesh.position.copy(p.targetPos);
+  mp.peers.set(id, p);
+  return p;
+}
+function mpRemovePeer(id){
+  const p = mp.peers.get(id);
+  if(!p) return;
+  mpGroup.remove(p.mesh);
+  mp.peers.delete(id);
+}
+
+function mpConnect(url){
+  return new Promise((resolve, reject)=>{
+    if(mp.ws && mp.connected) return resolve();
+    mpClose();
+    mpSetHint("Connecting…");
+    let ws;
+    try{ ws = new WebSocket(url); }catch(err){ mpSetHint("Bad URL"); return reject(err); }
+    mp.ws = ws;
+
+    ws.addEventListener("open", ()=>{
+      mp.connected = true;
+      mpSetHint("Connected. Create or Join a room.");
+      resolve();
+    });
+
+    ws.addEventListener("message", (ev)=>{
+      let msg;
+      try{ msg = JSON.parse(ev.data); }catch{ return; }
+      if(!msg || typeof msg.t!=="string") return;
+
+      if(msg.t==="hello"){ mp.id = msg.id; return; }
+
+
+      if(msg.t==="match_waiting"){
+        mp.matchmaking = true;
+        mp.matchStarted = false;
+        mp.matchId = msg.matchId || null;
+        mp.room = mp.matchId;
+        mpSetRoom(mp.matchId || "AUTO");
+        mpSetPlayers(msg.count || 1);
+        if(autoMatchBtn) autoMatchBtn.textContent = "Cancel Matchmaking";
+        autoMatchText(`Waiting for 2nd player… <b>${msg.count || 1}/5</b>`);
+        return;
+      }
+
+      if(msg.t==="match_started"){
+        mp.matchmaking = false;
+        mp.matchStarted = true;
+        mp.matchId = msg.matchId || mp.matchId;
+        mp.room = mp.matchId;
+        mpSetRoom(mp.matchId || "AUTO");
+        mpSetPlayers(msg.count || 2);
+        if(autoMatchBtn) autoMatchBtn.textContent = "Leave Multiplayer";
+        autoMatchText(`Race started! Players: <b>${msg.count || 2}/5</b>. Late join is open until 5.`);
+        if(menu && menu.style.display !== "none"){
+          btnPlay.click();
+        }
+        return;
+      }
+
+      if(msg.t==="match_joined"){
+        mp.matchmaking = false;
+        mp.matchStarted = true;
+        mp.matchId = msg.matchId || mp.matchId;
+        mp.room = mp.matchId;
+        mpSetRoom(mp.matchId || "AUTO");
+        mpSetPlayers(msg.count || 1);
+        if(autoMatchBtn) autoMatchBtn.textContent = "Leave Multiplayer";
+        autoMatchText(`Joined active race. Players: <b>${msg.count || 1}/5</b>`);
+        if(menu && menu.style.display !== "none"){
+          btnPlay.click();
+        }
+        return;
+      }
+
+      if(msg.t==="match_full"){
+        autoMatchText("All races are full. Try again.");
+        if(autoMatchBtn) autoMatchBtn.textContent = "Multiplayer Play";
+        return;
+      }
+
+      if(msg.t==="match_cancelled"){
+        mp.matchmaking = false;
+        mp.matchStarted = false;
+        mp.matchId = null;
+        mp.room = null;
+        mpResetPeers();
+        mpSetRoom(null);
+        if(autoMatchBtn) autoMatchBtn.textContent = "Multiplayer Play";
+        autoMatchText("Matchmaking cancelled.");
+        return;
+      }
+
+      if(msg.t==="created" || msg.t==="joined"){
+        mp.room = msg.room;
+        mpSetRoom(mp.room);
+        mpSetHint("In room " + mp.room + ". Press Play on ALL PCs.");
+        mpResetPeers();
+        return;
+      }
+
+      if(msg.t==="peers"){
+        const ids = Array.isArray(msg.ids) ? msg.ids : [];
+        // add
+        for(const id of ids){
+          if(id===mp.id) continue;
+          mpUpsertPeer(id, 0xffffff);
+        }
+        // remove
+        for(const id of Array.from(mp.peers.keys())){
+          if(!ids.includes(id)) mpRemovePeer(id);
+        }
+        mpSetPlayers(1 + mp.peers.size);
+        return;
+      }
+
+      if(msg.t==="left"){
+        if(msg.id) mpRemovePeer(msg.id);
+        mpSetPlayers(1 + mp.peers.size);
+        return;
+      }
+
+      if(msg.t==="state"){
+        const from = msg.from;
+        const s = msg.s;
+        if(!from || from===mp.id || !s) return;
+        const peer = mpUpsertPeer(from, (typeof s.c==="number") ? s.c : 0xffffff);
+        peer.targetPos.set(s.x||0, 0, s.z||0);
+        peer.targetYaw = s.yaw||0;
+        return;
+      }
+    });
+
+    ws.addEventListener("close", ()=>{ mpClose(); });
+    ws.addEventListener("error", ()=>{ mpSetHint("Connection error (check IP + firewall)."); });
+  });
+}
+
+async function mpCreateRoom(){
+  const url = mpServer?.value?.trim();
+  try{
+    await mpConnect(url);
+    mp.ws?.send(JSON.stringify({t:"create"}));
+  }catch{ mpSetHint("Could not connect. If on Render, open your Render app URL. If local, use ws://localhost:3000"); }
+}
+async function mpJoinRoom(){
+  const url = mpServer?.value?.trim();
+  const room = (mpRoom?.value||"").trim().toUpperCase();
+  if(!room){ mpSetHint("Type a PIN first."); return; }
+  try{
+    await mpConnect(url);
+    mp.ws?.send(JSON.stringify({t:"join", room}));
+  }catch{ mpSetHint("Could not connect. If on Render, open your Render app URL. If local, use ws://localhost:3000"); }
+}
+function mpLeaveRoom(){
+  try{ mp.ws?.send(JSON.stringify({t:"leave"})); }catch{}
+  mpClose();
+}
+
+async function mpAutoPlay(){
+  const url = mpDefaultServer();
+  try{
+    await mpConnect(url);
+    if(mp.matchmaking || mp.matchStarted){
+      mp.ws?.send(JSON.stringify({t:"match_leave"}));
+      mp.matchmaking = false;
+      mp.matchStarted = false;
+      mp.matchId = null;
+      if(autoMatchBtn) autoMatchBtn.textContent = "Multiplayer Play";
+      autoMatchText("Left multiplayer.");
+      mpResetPeers();
+      return;
+    }
+    mp.ws?.send(JSON.stringify({t:"match_play"}));
+    if(autoMatchBtn) autoMatchBtn.textContent = "Cancel Matchmaking";
+    autoMatchText("Finding multiplayer race…");
+  }catch{
+    autoMatchText("Could not connect. On Render use Build Command: npm install and Start Command: npm start. Open your Render app URL first, then click Multiplayer Play.");
+  }
+}
+
+
+mpCreate?.addEventListener("click", (e)=>{ e.preventDefault(); mpCreateRoom(); });
+mpJoin?.addEventListener("click", (e)=>{ e.preventDefault(); mpJoinRoom(); });
+mpLeave?.addEventListener("click", (e)=>{ e.preventDefault(); mpLeaveRoom(); });
+autoMatchBtn?.addEventListener("click", (e)=>{ e.preventDefault(); mpAutoPlay(); });
+
+// Sky dome gradient (cheap but looks great)
+{
+  const skyGeo = new THREE.SphereGeometry(5200, 32, 18);
+  const skyMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: {
+      top:    { value: new THREE.Color(0x7fc8ff) },
+      bottom: { value: new THREE.Color(0xfad3ea) },
+      offset: { value: 80.0 },
+      exponent:{ value: 0.65 }
+    },
+    vertexShader: `
+      varying vec3 vPos;
+      void main(){
+        vPos = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 top;
+      uniform vec3 bottom;
+      uniform float offset;
+      uniform float exponent;
+      varying vec3 vPos;
+      void main(){
+        float h = normalize(vPos + vec3(0.0, offset, 0.0)).y;
+        float t = pow(max(h,0.0), exponent);
+        gl_FragColor = vec4(mix(bottom, top, t), 1.0);
+      }
+    `
+  });
+  const sky = new THREE.Mesh(skyGeo, skyMat);
+  sky.position.y = 0;
+  scene.add(sky);
+}
+
+// Procedural grass texture (no images needed)
+function makeGrassTex(){
+  const c = document.createElement("canvas");
+  c.width = 512; c.height = 512;
+  const g = c.getContext("2d");
+  g.fillStyle = "#2f9a52";
+  g.fillRect(0,0,c.width,c.height);
+
+  for(let i=0;i<65000;i++){
+    const x = (Math.random()*c.width)|0;
+    const y = (Math.random()*c.height)|0;
+    const v = 90 + (Math.random()*110);
+    g.fillStyle = `rgba(${20+v*0.15}, ${80+v*0.55}, ${20+v*0.10}, ${0.06+Math.random()*0.12})`;
+    g.fillRect(x,y,1,1);
+  }
+
+  g.globalAlpha = 0.12;
+  for(let y=0;y<c.height;y+=14){
+    g.fillStyle = (y/14)%2===0 ? "#1f7f41" : "#37b160";
+    g.fillRect(0,y,c.width,7);
+  }
+  g.globalAlpha = 1;
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(40,40);
+  tex.anisotropy = 8;
+  return tex;
+}
+
+// Ground
+const grassTex = makeGrassTex();
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(9000, 9000),
+  new THREE.MeshStandardMaterial({ map: grassTex, color:0xffffff, roughness:1, metalness:0 })
+);
+ground.rotation.x = -Math.PI/2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Decorations
+const deco = new THREE.Group();
+scene.add(deco);
+// Clean track mode: no decorative objects
+try{deco.clear();}catch{}
+
+function addTree(){ /* removed for clean track */ }
+
+function addHouse(){ /* removed for clean track */ }
+
+function addFenceLine(x,z,len=20,rot=0){
+  const group = new THREE.Group();
+  const postMat = new THREE.MeshStandardMaterial({ color:0x6d4a2f, roughness:1 });
+  const railMat = new THREE.MeshStandardMaterial({ color:0x7a573a, roughness:1 });
+
+  const postGeo = new THREE.BoxGeometry(0.25, 1.2, 0.25);
+  const railGeo = new THREE.BoxGeometry(2.2, 0.18, 0.18);
+
+  const posts = Math.max(6, Math.floor(len/2.4));
+  for(let i=0;i<posts;i++){
+    const p = new THREE.Mesh(postGeo, postMat);
+    p.position.set((i-posts/2)*2.2, 0.6, 0);
+    p.castShadow=true; p.receiveShadow=true;
+    group.add(p);
+
+    if(i<posts-1){
+      const r1 = new THREE.Mesh(railGeo, railMat);
+      r1.position.set((i-posts/2)*2.2 + 1.1, 0.9, 0);
+      r1.castShadow=true; r1.receiveShadow=true;
+      group.add(r1);
+
+      const r2 = r1.clone();
+      r2.position.y = 0.55;
+      group.add(r2);
+    }
+  }
+
+  group.position.set(x,0,z);
+  group.rotation.y = rot;
+  deco.add(group);
+}
+
+// Trees ring + some closer trackside trees
+for(let i=0;i<320;i++){
+  const r = rng(550, 2600);
+  const a = rng(0, TAU);
+  addTree(Math.cos(a)*r + rng(-110,110), Math.sin(a)*r + rng(-110,110), rng(0.70,1.95));
+}
+
+// Houses OUTSIDE the track (big ones rarer)
+for(let i=0;i<45;i++){
+  const r = rng(520, 1200);
+  const a = rng(0, TAU);
+  const x = Math.cos(a)*r + rng(-70,70);
+  const z = Math.sin(a)*r + rng(-70,70);
+  const big = Math.random() < 0.18;
+  addHouse(x, z, rng(0.85, 1.35), big);
+}
+
+// Fence lines near some houses
+for(let i=0;i<26;i++){
+  const r = rng(520, 1200);
+  const a = rng(0, TAU);
+  const x = Math.cos(a)*r + rng(-60,60);
+  const z = Math.sin(a)*r + rng(-60,60);
+  addFenceLine(x, z, rng(16, 38), rng(0, TAU));
+}
+
+/* (Paste continuation inside the FIRST module script) */
+
+// Mountains ring
+const mountains = new THREE.Group();
+scene.add(mountains);
+{
+  const mat = new THREE.MeshStandardMaterial({color:0x6e7fa3, roughness:1, metalness:0});
+  for(let i=0;i<220;i++){
+    const h = rng(30, 190);
+    const rr = rng(1800, 3600);
+    const ang = (i/220)*TAU;
+    const geo = new THREE.ConeGeometry(rng(18,85), h, 6);
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(Math.cos(ang)*rr + rng(-120,120), h*0.5-4, Math.sin(ang)*rr + rng(-120,120));
+    m.rotation.y = rng(0, TAU);
+    m.receiveShadow = true;
+    mountains.add(m);
+  }
+}
+
+// Track
+const track = new THREE.Group();
+scene.add(track);
+
+// FULL FEATURES + WIDE TRACK FIX: bigger road, wider curbs, walls moved outward
+const TRACK = { width: 22.0, curb: 2.2, wallH: 1.5, wallW: 0.85, segments: 1100 };
+
+
+const TRACKS = [
+  {name:"Monza Style", pts:[
+    v3(-40,0,-260), v3(140,0,-250), v3(260,0,-220), v3(320,0,-160),
+    v3(290,0,-90),  v3(210,0,-40),  v3(130,0,-10),  v3(80,0,10),
+    v3(120,0,40),   v3(240,0,80),   v3(320,0,140),  v3(330,0,220),
+    v3(280,0,280),  v3(190,0,310),  v3(80,0,300),   v3(10,0,250),
+    v3(-40,0,160),  v3(-20,0,80),   v3(40,0,40),    v3(20,0,-10),
+    v3(-80,0,-70),  v3(-170,0,-120),v3(-240,0,-170),v3(-230,0,-230),
+    v3(-150,0,-260),v3(-40,0,-260),
+  ]},
+  {name:"Fast Oval", pts:[
+    v3(0,0,-320), v3(180,0,-220), v3(300,0,0), v3(180,0,220),
+    v3(0,0,320), v3(-180,0,220), v3(-300,0,0), v3(-180,0,-220), v3(0,0,-320)
+  ]},
+  {name:"Chicane Rush", pts:[
+    v3(-260,0,-220), v3(120,0,-260), v3(260,0,-160), v3(120,0,-60),
+    v3(260,0,40), v3(120,0,140), v3(260,0,240), v3(0,0,320),
+    v3(-260,0,220), v3(-120,0,60), v3(-260,0,-40), v3(-120,0,-140),
+    v3(-260,0,-220)
+  ]}
+];
+let trackIndex = 0;
+let pts = TRACKS[trackIndex].pts;
+let curve = new THREE.CatmullRomCurve3(pts, true, "catmullrom", 0.35);
+
+function rebuildTrackGeometry(){
+  // clear old meshes
+  while(track.children.length) track.remove(track.children[0]);
+  wallBoxes.length = 0;
+
+  // rebuild ribbons
+  buildRibbon(roadMat, TRACK.width, 0.03);
+  buildRibbon(curbMat, TRACK.width + TRACK.curb, 0.035, 0.01);
+  buildRibbon(lineMat, 0.35, 0.045, 0.015);
+  addStartFinishLine();
+
+  // rebuild samples
+  totalLen = 0;
+  {
+    let prev = curve.getPointAt(0);
+    samples[0] = {u:0, d:0, p:prev};
+    for(let i=1;i<SAMPLE_N;i++){
+      const u=i/(SAMPLE_N-1);
+      const p=curve.getPointAt(u);
+      totalLen += p.distanceTo(prev);
+      samples[i] = {u, d:totalLen, p};
+      prev=p;
+    }
+  }
+
+  // rebuild walls
+  {
+    const segs = Math.floor(TRACK.segments/3);
+    const up=v3(0,1,0), t=v3(), n=v3();
+    const wallGeo = new THREE.BoxGeometry(TRACK.wallW, TRACK.wallH, 8);
+
+    for(let i=0;i<segs;i++){
+      const u = i/segs;
+      const p0 = curve.getPointAt(u);
+      const p1 = curve.getPointAt((u + 1/segs)%1);
+      t.copy(p1).sub(p0).normalize();
+      n.copy(up).cross(t).normalize();
+
+      const left = p0.clone().addScaledVector(n, -(TRACK.width + TRACK.curb + 2.2));
+      const right= p0.clone().addScaledVector(n,  (TRACK.width + TRACK.curb + 2.2));
+
+      const wallL = new THREE.Mesh(wallGeo, wallMat);
+      wallL.position.set(left.x, TRACK.wallH*0.5, left.z);
+      wallL.rotation.y = Math.atan2(t.x, t.z);
+      wallL.castShadow=false; wallL.receiveShadow=true;
+
+      const wallR = wallL.clone();
+      wallR.position.set(right.x, TRACK.wallH*0.5, right.z);
+
+      track.add(wallL, wallR);
+
+      wallBoxes.push(new THREE.Box3().setFromObject(wallL));
+      wallBoxes.push(new THREE.Box3().setFromObject(wallR));
+    }
+  }
+}
+
+addEventListener("keydown",(e)=>{
+  if(e.code==="KeyT" && (state==="menu"||state==="run"||state==="pause")){
+    trackIndex = (trackIndex+1)%TRACKS.length;
+    pts = TRACKS[trackIndex].pts;
+    curve = new THREE.CatmullRomCurve3(pts, true, "catmullrom", 0.35);
+    rebuildTrackGeometry();
+    resetRun();
+    toastMsg("Track: "+TRACKS[trackIndex].name);
+  }
+});
+(pts, true, "catmullrom", 0.35);
+
+// Precompute curve length + quick distance->u mapping
+const SAMPLE_N = 2400;
+const samples = new Array(SAMPLE_N);
+let totalLen = 0;
+{
+  let prev = curve.getPointAt(0);
+  samples[0] = {u:0, d:0, p:prev};
+  for(let i=1;i<SAMPLE_N;i++){
+    const u=i/(SAMPLE_N-1);
+    const p=curve.getPointAt(u);
+    totalLen += p.distanceTo(prev);
+    samples[i] = {u, d:totalLen, p};
+    prev=p;
+  }
+}
+function uFromDistance(d){
+  // wrap
+  d = ((d%totalLen)+totalLen)%totalLen;
+  // binary search in samples by d
+  let lo=0, hi=SAMPLE_N-1;
+  while(lo<hi){
+    const mid=(lo+hi)>>1;
+    if(samples[mid].d < d) lo=mid+1; else hi=mid;
+  }
+  const i=clamp(lo,1,SAMPLE_N-1);
+  const a=samples[i-1], b=samples[i];
+  const t=(d-a.d)/Math.max(1e-6,(b.d-a.d));
+  return lerp(a.u,b.u,t);
+}
+function distanceFromU(u){
+  // u in [0,1)
+  const idx = Math.floor(u*(SAMPLE_N-1));
+  const i=clamp(idx,0,SAMPLE_N-2);
+  const a=samples[i], b=samples[i+1];
+  const t=(u-a.u)/Math.max(1e-6,(b.u-a.u));
+  return lerp(a.d,b.d,t);
+}
+
+const roadMat = new THREE.MeshStandardMaterial({color:0x2b2b2b, roughness:0.92, metalness:0.05});
+const lineMat = new THREE.MeshStandardMaterial({color:0xf5f5f5, roughness:0.7, metalness:0});
+const curbMat = new THREE.MeshStandardMaterial({color:0xff3b3b, roughness:0.95, metalness:0});
+const wallMat = new THREE.MeshStandardMaterial({color:0x12161c, roughness:0.85, metalness:0.10});
+
+function buildRibbon(meshMat, halfWidth, y, lift=0){
+  const segs = TRACK.segments;
+  const pos = new Float32Array(segs*2*3);
+  const idx = [];
+  const up = v3(0,1,0);
+  const t = v3(), n = v3();
+
+  for(let i=0;i<segs;i++){
+    const u = i/(segs-1);
+    const p0 = curve.getPointAt(u);
+    const p1 = curve.getPointAt((u + 1/(segs-1))%1);
+    t.copy(p1).sub(p0).normalize();
+    n.copy(up).cross(t).normalize();
+
+    const L = p0.clone().addScaledVector(n, -halfWidth);
+    const R = p0.clone().addScaledVector(n,  halfWidth);
+
+    const base = i*2;
+    pos[(base+0)*3+0]=L.x; pos[(base+0)*3+1]=y+lift; pos[(base+0)*3+2]=L.z;
+    pos[(base+1)*3+0]=R.x; pos[(base+1)*3+1]=y+lift; pos[(base+1)*3+2]=R.z;
+
+    if(i<segs-1){
+      const a=base, b=base+1, c=base+2, d=base+3;
+      idx.push(a,c,b, b,c,d);
+    }
+  }
+
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos,3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+
+  const m = new THREE.Mesh(g, meshMat);
+  m.receiveShadow=true;
+  track.add(m);
+  return m;
+}
+
+
+// Visible F1-style start/finish line across the road.
+// It is rebuilt with the track, so changing tracks still keeps the lap line visible.
+function addStartFinishLine(){
+  const up = v3(0,1,0);
+  const p0 = curve.getPointAt(0);
+  const p1 = curve.getPointAt(0.008);
+  const t = p1.clone().sub(p0).normalize();          // driving direction
+  const n = up.clone().cross(t).normalize();         // across the road
+
+  const finishGroup = new THREE.Group();
+  finishGroup.name = "REAL_VISIBLE_START_FINISH_LINE";
+
+  // Use matrix placement so the checker ALWAYS lies exactly across the track.
+  const halfWidth = TRACK.width + TRACK.curb + 1.6;
+  const stripLength = 14.0;
+  const blackMatFinish = new THREE.MeshStandardMaterial({ color:0x000000, roughness:0.35, metalness:0.0 });
+  const whiteMatFinish = new THREE.MeshStandardMaterial({ color:0xffffff, roughness:0.25, metalness:0.0, emissive:0xffffff, emissiveIntensity:0.10 });
+  const redMatFinish = new THREE.MeshStandardMaterial({ color:0xff2020, roughness:0.30, metalness:0.0, emissive:0x330000, emissiveIntensity:0.15 });
+
+  function placeLocal(mesh, lateral, forward, y){
+    const pos = p0.clone().addScaledVector(n, lateral).addScaledVector(t, forward);
+    mesh.position.set(pos.x, y, pos.z);
+    mesh.rotation.y = Math.atan2(t.x, t.z);
+    finishGroup.add(mesh);
+  }
+
+  // Big red carpet under the checkerboard so it is visible even when driving fast.
+  const base = new THREE.Mesh(new THREE.BoxGeometry(halfWidth*2.15, 0.12, stripLength+2.0), redMatFinish);
+  placeLocal(base, 0, 0, 0.075);
+
+  // Large checkerboard road stripe, like F1 start/finish line.
+  const cols = 16;
+  const rows = 6;
+  const tileW = (halfWidth*2) / cols;
+  const tileL = stripLength / rows;
+  for(let c=0;c<cols;c++){
+    for(let r=0;r<rows;r++){
+      const tile = new THREE.Mesh(
+        new THREE.BoxGeometry(tileW*0.98, 0.13, tileL*0.96),
+        ((c+r)%2===0) ? blackMatFinish : whiteMatFinish
+      );
+      placeLocal(tile, -halfWidth + tileW*(c+0.5), -stripLength/2 + tileL*(r+0.5), 0.17);
+    }
+  }
+
+  // Tall finish gantry/arch with checkered board above the road so you cannot miss it.
+  const poleMat = new THREE.MeshStandardMaterial({ color:0x070707, roughness:0.45, metalness:0.1 });
+  const sideSignMat = new THREE.MeshStandardMaterial({ color:0xffffff, roughness:0.35, metalness:0.0, emissive:0xffffff, emissiveIntensity:0.08 });
+  for(const side of [-1,1]){
+    const pole = new THREE.Mesh(new THREE.BoxGeometry(0.8, 8.0, 0.8), poleMat);
+    placeLocal(pole, side*(halfWidth+2.1), 0, 4.0);
+  }
+  const topBar = new THREE.Mesh(new THREE.BoxGeometry((halfWidth+2.1)*2, 1.25, 0.85), poleMat);
+  placeLocal(topBar, 0, 0, 8.05);
+
+  const signCols = 18;
+  const signW = ((halfWidth+1.0)*2) / signCols;
+  for(let c=0;c<signCols;c++){
+    const tile = new THREE.Mesh(new THREE.BoxGeometry(signW*0.96, 1.05, 0.92), (c%2===0)?whiteMatFinish:blackMatFinish);
+    placeLocal(tile, -(halfWidth+1.0) + signW*(c+0.5), 0, 8.12);
+  }
+
+  // Extra side boards with START/FINISH feeling (white blocks near both sides).
+  for(const side of [-1,1]){
+    const board = new THREE.Mesh(new THREE.BoxGeometry(4.5, 1.3, 0.5), sideSignMat);
+    placeLocal(board, side*(halfWidth+3.2), 3.4, 2.4);
+  }
+
+  track.add(finishGroup);
+}
+buildRibbon(roadMat, TRACK.width, 0.03);
+buildRibbon(curbMat, TRACK.width + TRACK.curb, 0.035, 0.01);
+buildRibbon(lineMat, 0.35, 0.045, 0.015);
+addStartFinishLine();
+
+// =========================
+// Monza-style props (pit lane + grandstands) — keeps everything else
+// =========================
+const monzaProps = new THREE.Group();
+scene.add(monzaProps);
+
+function addGrandstandStrip(x0,z0, x1,z1, count=18){
+  const mat = new THREE.MeshStandardMaterial({color:0xe7e7e7, roughness:0.92, metalness:0.02});
+  for(let i=0;i<count;i++){
+    const t=i/(count-1);
+    const x=lerp(x0,x1,t), z=lerp(z0,z1,t);
+    const w=14+rng(0,8), h=10+rng(0,4), d=46+rng(0,20);
+    const g = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+    g.position.set(x, h*0.5, z);
+    g.rotation.y = rng(-0.08,0.08);
+    g.castShadow=true; g.receiveShadow=true;
+    monzaProps.add(g);
+  }
+}
+
+// Main straight grandstands (both sides)
+addGrandstandStrip(-40, -1045, 280, -1045, 22);
+addGrandstandStrip(-40,  -915, 280,  -915, 22);
+
+// Simple pit building block
+{
+  const pitMat = new THREE.MeshStandardMaterial({color:0xf2f2f2, roughness:0.85, metalness:0.05});
+  const glass = new THREE.MeshStandardMaterial({color:0x9be2ff, roughness:0.18, metalness:0.1, transparent:true, opacity:0.65, emissive:new THREE.Color(0x12364f), emissiveIntensity:0.22});
+  const base = new THREE.Mesh(new THREE.BoxGeometry(140, 10, 26), pitMat);
+  base.position.set(140, 5, -1120);
+  base.castShadow=true; base.receiveShadow=true;
+  monzaProps.add(base);
+
+  const top = new THREE.Mesh(new THREE.BoxGeometry(150, 6, 18), pitMat);
+  top.position.set(140, 13.5, -1120);
+  top.castShadow=true; top.receiveShadow=true;
+  monzaProps.add(top);
+
+  const win = new THREE.Mesh(new THREE.BoxGeometry(130, 4, 2), glass);
+  win.position.set(140, 13.0, -1109);
+  win.castShadow=false; win.receiveShadow=false;
+  monzaProps.add(win);
+
+  // flag poles
+  const poleMat = new THREE.MeshStandardMaterial({color:0x222222, roughness:0.7, metalness:0.3});
+  const poleGeo = new THREE.CylinderGeometry(0.35,0.35,18,10);
+  for(let i=0;i<8;i++){
+    const p = new THREE.Mesh(poleGeo, poleMat);
+    p.position.set(80 + i*15, 9, -1136);
+    p.castShadow=true;
+    monzaProps.add(p);
+  }
+}
+
+// Walls + collision boxes (static)
+const wallBoxes = [];
+{
+  const segs = Math.floor(TRACK.segments/3);
+  const up=v3(0,1,0), t=v3(), n=v3();
+  const wallGeo = new THREE.BoxGeometry(TRACK.wallW, TRACK.wallH, 8);
+
+  for(let i=0;i<segs;i++){
+    const u = i/segs;
+    const p0 = curve.getPointAt(u);
+    const p1 = curve.getPointAt((u + 1/segs)%1);
+    t.copy(p1).sub(p0).normalize();
+    n.copy(up).cross(t).normalize();
+
+    const left = p0.clone().addScaledVector(n, -(TRACK.width + TRACK.curb + 2.2));
+    const right= p0.clone().addScaledVector(n,  (TRACK.width + TRACK.curb + 2.2));
+
+    const wallL = new THREE.Mesh(wallGeo, wallMat);
+    wallL.position.set(left.x, TRACK.wallH*0.5, left.z);
+    wallL.rotation.y = Math.atan2(t.x, t.z);
+    wallL.castShadow=true; wallL.receiveShadow=true;
+
+    const wallR = wallL.clone();
+    wallR.position.set(right.x, TRACK.wallH*0.5, right.z);
+
+    track.add(wallL, wallR);
+
+    wallBoxes.push(new THREE.Box3().setFromObject(wallL));
+    wallBoxes.push(new THREE.Box3().setFromObject(wallR));
+  }
+}
+
+// Road check
+function closestU(pos, steps=240){
+  let bestU=0, bestD=1e18;
+  for(let i=0;i<=steps;i++){
+    const u=i/steps;
+    const p=curve.getPointAt(u);
+    const dx=p.x-pos.x, dz=p.z-pos.z;
+    const d=dx*dx+dz*dz;
+    if(d<bestD){bestD=d; bestU=u;}
+  }
+  return bestU;
+}
+function onRoad(pos){
+  const u=closestU(pos, 220);
+  const p=curve.getPointAt(u);
+  const t=curve.getTangentAt(u).normalize();
+  const right=v3(t.z,0,-t.x).normalize();
+  const rel=pos.clone().sub(p);
+  const lateral=rel.dot(right);
+  return Math.abs(lateral) <= (TRACK.width + TRACK.curb + 1.25);
+}
+
+
+/* (Paste continuation inside the FIRST module script) */
+
+/* =========================
+   Car + cockpit wheel-only view
+========================= */
+const car = new THREE.Group();
+scene.add(car);
+
+const f1 = new THREE.Group();
+car.add(f1);
+
+const bodyPaint = new THREE.MeshStandardMaterial({color:0xd61b2a, roughness:0.32, metalness:0.42});
+const bodyDark  = new THREE.MeshStandardMaterial({color:0x16191f, roughness:0.55, metalness:0.22});
+const blackMat  = new THREE.MeshStandardMaterial({color:0x050609, roughness:0.92, metalness:0.05});
+const carbonMat = new THREE.MeshStandardMaterial({color:0x0b0d10, roughness:0.86, metalness:0.18});
+const glassMat  = new THREE.MeshStandardMaterial({color:0x7fd0ff, roughness:0.14, metalness:0.18, transparent:true, opacity:0.42});
+const rimMat    = new THREE.MeshStandardMaterial({color:0x252a31, roughness:0.30, metalness:0.70});
+const brakeMat  = new THREE.MeshStandardMaterial({color:0x333333, roughness:0.36, metalness:0.65});
+
+function addBox(parent, name, geo, mat, x,y,z, sx=1,sy=1,sz=1){
+  const m = new THREE.Mesh(geo, mat);
+  m.name = name;
+  m.position.set(x,y,z);
+  m.scale.set(sx,sy,sz);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  parent.add(m);
+  return m;
+}
+
+// REAL F1-STYLE VISUAL MODEL — open wheels, long nose, aero wings, sidepods, halo, mirrors, suspension.
+const floor = addBox(f1, "f1_floor", new THREE.BoxGeometry(2.45, 0.08, 6.95), carbonMat, 0, 0.47, 0.15);
+const plank = addBox(f1, "f1_plank", new THREE.BoxGeometry(0.72, 0.045, 6.25), bodyDark, 0, 0.425, 0.25);
+
+const monocoque = addBox(f1, "f1_monocoque", new THREE.BoxGeometry(1.32, 0.48, 2.05), bodyPaint, 0, 0.78, -0.75);
+const survivalCell = addBox(f1, "f1_survival_cell", new THREE.BoxGeometry(1.55, 0.56, 1.38), bodyPaint, 0, 0.84, 0.20);
+const engineCover = addBox(f1, "f1_engine_cover", new THREE.BoxGeometry(1.02, 0.72, 2.55), bodyPaint, 0, 0.96, 1.82);
+const sharkFin = addBox(f1, "f1_shark_fin", new THREE.BoxGeometry(0.12, 0.98, 1.55), bodyPaint, 0, 1.42, 2.15);
+const airbox = addBox(f1, "f1_airbox", new THREE.BoxGeometry(0.62, 0.30, 0.50), bodyDark, 0, 1.44, 0.85);
+
+const nose = addBox(f1, "f1_long_nose", new THREE.BoxGeometry(0.72, 0.26, 2.92), bodyPaint, 0, 0.66, -2.82);
+const noseTip = addBox(f1, "f1_nose_tip", new THREE.BoxGeometry(0.36, 0.16, 0.82), bodyPaint, 0, 0.59, -4.45);
+const noseStripe = addBox(f1, "f1_nose_stripe", new THREE.BoxGeometry(0.08, 0.012, 3.10), carbonMat, 0, 0.802, -3.02);
+
+// Multi-element front wing
+const fwMain = addBox(f1, "f1_front_wing_main", new THREE.BoxGeometry(4.28, 0.08, 0.62), carbonMat, 0, 0.40, -4.98);
+const fwFlap1 = addBox(f1, "f1_front_wing_flap1", new THREE.BoxGeometry(4.05, 0.055, 0.42), bodyPaint, 0, 0.52, -4.72);
+const fwFlap2 = addBox(f1, "f1_front_wing_flap2", new THREE.BoxGeometry(3.65, 0.045, 0.32), carbonMat, 0, 0.62, -4.50);
+const fwEndL = addBox(f1, "f1_front_endplate_L", new THREE.BoxGeometry(0.10, 0.62, 0.86), carbonMat, -2.12, 0.56, -4.78);
+const fwEndR = addBox(f1, "f1_front_endplate_R", new THREE.BoxGeometry(0.10, 0.62, 0.86), carbonMat,  2.12, 0.56, -4.78);
+
+// Sidepods with dark intakes
+const sideL = addBox(f1, "f1_sidepod_L", new THREE.BoxGeometry(0.92, 0.42, 2.25), bodyPaint, -1.10, 0.78, 0.82);
+const sideR = addBox(f1, "f1_sidepod_R", new THREE.BoxGeometry(0.92, 0.42, 2.25), bodyPaint,  1.10, 0.78, 0.82);
+const intakeL = addBox(f1, "f1_sidepod_intake_L", new THREE.BoxGeometry(0.08, 0.28, 0.72), carbonMat, -1.59, 0.88, -0.10);
+const intakeR = addBox(f1, "f1_sidepod_intake_R", new THREE.BoxGeometry(0.08, 0.28, 0.72), carbonMat,  1.59, 0.88, -0.10);
+const bargeL = addBox(f1, "f1_bargeboard_L", new THREE.BoxGeometry(0.08, 0.56, 0.90), carbonMat, -1.72, 0.72, -0.52);
+const bargeR = addBox(f1, "f1_bargeboard_R", new THREE.BoxGeometry(0.08, 0.56, 0.90), carbonMat,  1.72, 0.72, -0.52);
+
+// Cockpit: halo, headrest, mirrors, realistic cockpit camera pieces
+const cockpitTub = addBox(f1, "f1_cockpit_tub", new THREE.BoxGeometry(1.04, 0.32, 1.10), bodyDark, 0, 1.00, -0.58);
+const headrest = addBox(f1, "f1_headrest", new THREE.BoxGeometry(0.70, 0.30, 0.38), blackMat, 0, 1.18, -0.05);
+const halo = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.055, 12, 34, Math.PI*1.34), carbonMat);
+halo.name = "f1_halo";
+halo.rotation.x = Math.PI/2;
+halo.rotation.z = Math.PI*0.03;
+halo.position.set(0, 1.26, -0.55);
+halo.castShadow = true;
+f1.add(halo);
+addBox(f1, "f1_halo_center_stem", new THREE.BoxGeometry(0.12, 0.45, 0.12), carbonMat, 0, 1.06, -0.33);
+addBox(f1, "f1_halo_left_mount", new THREE.BoxGeometry(0.10, 0.30, 0.12), carbonMat, -0.58, 1.07, -0.48);
+addBox(f1, "f1_halo_right_mount", new THREE.BoxGeometry(0.10, 0.30, 0.12), carbonMat,  0.58, 1.07, -0.48);
+
+const mirrorL = addBox(f1, "f1_mirror_L", new THREE.BoxGeometry(0.36, 0.13, 0.10), carbonMat, -1.08, 1.12, -0.72);
+const mirrorR = addBox(f1, "f1_mirror_R", new THREE.BoxGeometry(0.36, 0.13, 0.10), carbonMat,  1.08, 1.12, -0.72);
+addBox(f1, "f1_tcam", new THREE.BoxGeometry(0.16, 0.16, 0.34), bodyDark, 0, 1.76, 0.88);
+
+// Rear aero
+const rwMain = addBox(f1, "f1_rear_wing_main", new THREE.BoxGeometry(3.10, 0.14, 0.58), carbonMat, 0, 1.30, 3.72);
+const rwDrs  = addBox(f1, "f1_rear_wing_drs",  new THREE.BoxGeometry(2.82, 0.10, 0.45), bodyPaint, 0, 1.55, 3.88);
+const rwBeam = addBox(f1, "f1_rear_beam_wing", new THREE.BoxGeometry(2.45, 0.08, 0.42), carbonMat, 0, 0.80, 3.48);
+addBox(f1, "f1_rear_endplate_L", new THREE.BoxGeometry(0.12, 1.10, 0.82), carbonMat, -1.55, 1.24, 3.74);
+addBox(f1, "f1_rear_endplate_R", new THREE.BoxGeometry(0.12, 1.10, 0.82), carbonMat,  1.55, 1.24, 3.74);
+addBox(f1, "f1_diffuser", new THREE.BoxGeometry(2.25, 0.22, 0.90), carbonMat, 0, 0.56, 3.32);
+
+// Steering wheel (visible in cockpit)
+const steering = new THREE.Group();
+steering.name = "f1_steering_wheel";
+f1.add(steering);
+{
+  const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.30, 0.045, 12, 28), blackMat);
+  wheel.name = "f1_steering_ring";
+  wheel.rotation.x = Math.PI/2;
+  wheel.castShadow=true;
+  const hub = new THREE.Mesh(new THREE.BoxGeometry(0.34,0.18,0.09), carbonMat);
+  hub.name = "f1_steering_hub";
+  hub.castShadow=true;
+  const display = new THREE.Mesh(new THREE.BoxGeometry(0.20,0.10,0.025), glassMat);
+  display.name = "f1_steering_display";
+  display.position.set(0,0,0.055);
+  const gripL = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.23,0.07), blackMat);
+  gripL.position.set(-0.31,0,0);
+  const gripR = gripL.clone(); gripR.position.x = 0.31;
+  steering.add(wheel, hub, display, gripL, gripR);
+  steering.position.set(0, 1.05, -0.80);
+  steering.rotation.x = -0.28;
+}
+
+// Wheels with brake discs, grooves, wheel covers, and suspension arms
+const tireGeo = new THREE.CylinderGeometry(0.64, 0.64, 0.68, 32);
+const rimGeo  = new THREE.CylinderGeometry(0.38, 0.38, 0.70, 24);
+const discGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.73, 24);
+const grooveGeo = new THREE.TorusGeometry(0.64, 0.012, 6, 32);
+
+const wheelGroups = [];
+function addSuspensionArm(x,z,front=true){
+  const xSign = Math.sign(x);
+  const anchorZ = front ? -1.55 : 1.25;
+  const arm1 = addBox(f1, "f1_suspension_arm", new THREE.BoxGeometry(1.28, 0.045, 0.055), carbonMat, x*0.55, 0.82, (z+anchorZ)/2);
+  arm1.rotation.y = xSign * 0.28;
+  const arm2 = addBox(f1, "f1_suspension_arm", new THREE.BoxGeometry(1.28, 0.045, 0.055), carbonMat, x*0.55, 0.62, (z+anchorZ)/2);
+  arm2.rotation.y = xSign * 0.18;
+}
+function addWheel(x,z,front=false){
+  const g = new THREE.Group();
+  g.name = front ? "f1_front_wheel" : "f1_rear_wheel";
+  const tire = new THREE.Mesh(tireGeo, blackMat);
+  tire.name = "f1_tire";
+  tire.rotation.z = Math.PI/2; tire.castShadow = true;
+  const rim = new THREE.Mesh(rimGeo, rimMat);
+  rim.name = "f1_rim";
+  rim.rotation.z = Math.PI/2; rim.castShadow = true;
+  const disc = new THREE.Mesh(discGeo, brakeMat);
+  disc.name = "f1_brake_disc";
+  disc.rotation.z = Math.PI/2; disc.castShadow = true;
+  g.add(tire, rim, disc);
+  for(let i=0;i<3;i++){
+    const groove = new THREE.Mesh(grooveGeo, bodyDark);
+    groove.name = "f1_tire_groove";
+    groove.rotation.y = Math.PI/2;
+    groove.position.x = -0.22 + i*0.22;
+    g.add(groove);
+  }
+  g.position.set(x, 0.62, z);
+  f1.add(g);
+  addSuspensionArm(x,z,front);
+  if(front){
+    const winglet = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.055, 0.62), carbonMat);
+    winglet.name = "f1_wheel_winglet";
+    winglet.position.set(x>0? -0.28 : 0.28, 0.20, -0.10);
+    winglet.castShadow = true;
+    g.add(winglet);
+  }
+  wheelGroups.push(g);
+  return g;
+}
+const wFL = addWheel(-1.66, -2.05, true);
+const wFR = addWheel( 1.66, -2.05, true);
+const wBL = addWheel(-1.74,  2.10, false);
+const wBR = addWheel( 1.74,  2.10, false);
+
+// Paint apply
+function applyCarPaint(){
+  const team = TEAM_LIST.find(t=>t.id===SAVE.teamId) || TEAM_LIST[0];
+  bodyPaint.color.setHex(team.color);
+  // Keep wings dark like carbon but put small team color elements on DRS/front flap.
+  if(typeof fwFlap1 !== "undefined") fwFlap1.material = bodyPaint;
+  if(typeof rwDrs !== "undefined") rwDrs.material = bodyPaint;
+}
+applyCarPaint();
+
+// ===== REAL F1 GLB ASSET WIRED INTO THE FULL RACING GAME =====
+// Physics, multiplayer sync, collisions, cockpit camera, and Render hosting still use `car`.
+// The downloaded GLB is attached as the visual model inside `f1`.
+let realF1Model = null;
+let realF1Loaded = false;
+const realF1Loader = new GLTFLoader();
+
+function applyRealF1Visibility(onCockpit=false){
+  if(!realF1Loaded || !realF1Model) return;
+  // Only iterate direct children of f1 — never touch GLB descendants.
+  for(const child of f1.children){
+    if(child === realF1Model){
+      child.visible = true;          // always show the GLB root
+    } else if(child === steering){
+      child.visible = onCockpit;     // steering wheel only in cockpit view
+    } else {
+      child.visible = false;         // hide every procedural fallback piece
+    }
+  }
+}
+
+realF1Loader.load(
+  "/f1car.glb",
+  (gltf) => {
+    realF1Model = gltf.scene;
+    realF1Model.name = "REAL_F1_GLB_MODEL";
+
+    // Tuned for the Ferrari F2008 Blender export you provided.
+    // Change this one value if your car appears too large/small.
+    // GLB native size is ~5.56 units — scale to ~9 game units (matches procedural car length)
+    realF1Model.scale.set(1.6, 1.6, 1.6);
+
+    // Align with your game's forward direction.
+    realF1Model.rotation.y = Math.PI;
+
+    // Lift slightly so the car sits on the track surface (not clipping through ground)
+    realF1Model.position.set(0, 0.0, 0);
+
+    realF1Model.traverse((obj) => {
+      if(obj.isMesh){
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+        if(obj.material) obj.material.needsUpdate = true;
+      }
+    });
+
+    f1.add(realF1Model);
+    realF1Loaded = true;
+    applyRealF1Visibility(viewMode === 2);
+    toastMsg("Real F1 model loaded");
+  },
+  undefined,
+  (err) => {
+    console.error("Could not load f1car.glb", err);
+    toastMsg("Missing f1car.glb");
+  }
+);
+
+/* =========================
+   Motion + GT7-style crash (NO SPIN)
+========================= */
+const vel = v3();
+let yaw = 0;
+
+let crashLock = 0;
+let crashCooldown = 0;
+let camShake = 0;
+let carRoll = 0;
+let carPitch = 0;
+
+// FX state
+let fireHold = 0;
+
+function spawnAt(u=0){
+  const p = curve.getPointAt(u);
+  const t = curve.getTangentAt(u).normalize();
+  yaw = Math.atan2(t.x, t.z);
+  car.position.set(p.x, 0, p.z);
+  car.rotation.y = yaw;
+  car.position.add(new THREE.Vector3(0,0,-1).applyAxisAngle(v3(0,1,0), yaw));
+  vel.set(0,0,0);
+
+  crashLock = 0;
+  crashCooldown = 0;
+  camShake = 0;
+  carRoll = 0;
+  carPitch = 0;
+  fireHold = 0;
+}
+
+/* =========================
+   Skid marks + dust + FX
+========================= */
+const skidGeo = new THREE.BufferGeometry();
+const skidMax = 3500; // PERF: lower skid segments
+const skidPos = new Float32Array(skidMax*3);
+let skidCount = 0;
+skidGeo.setAttribute("position", new THREE.BufferAttribute(skidPos,3));
+const skidMat = new THREE.LineBasicMaterial({transparent:true, opacity:0.32});
+const skid = new THREE.LineSegments(skidGeo, skidMat);
+scene.add(skid);
+
+function addSkidPoint(x,y,z){
+  if(skidCount >= skidMax) return;
+  skidPos[skidCount*3+0]=x;
+  skidPos[skidCount*3+1]=y;
+  skidPos[skidCount*3+2]=z;
+  skidCount++;
+  skidGeo.setDrawRange(0, skidCount);
+  skidGeo.attributes.position.needsUpdate = true;
+}
+
+const dustCount = 520; // PERF: lower dust particles
+const dustGeo=new THREE.BufferGeometry();
+const dustPos=new Float32Array(dustCount*3);
+const dustLife=new Float32Array(dustCount);
+for(let i=0;i<dustCount;i++){ dustPos[i*3+1]=-999; dustLife[i]=0; }
+dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos,3));
+const dustMat=new THREE.PointsMaterial({size:0.22, transparent:true, opacity:0.45});
+const dust=new THREE.Points(dustGeo, dustMat);
+scene.add(dust);
+
+function emitDust(px,pz,amt){
+  for(let k=0;k<amt;k++){
+    const i = (Math.random()*dustCount)|0;
+    dustPos[i*3+0]=px + (Math.random()-0.5)*1.7;
+    dustPos[i*3+1]=0.12 + Math.random()*0.2;
+    dustPos[i*3+2]=pz + (Math.random()-0.5)*1.7;
+    dustLife[i]=0.8 + Math.random()*0.7;
+  }
+  dustGeo.attributes.position.needsUpdate = true;
+}
+
+// Particles (sparks/fire)
+const fxMax = 1100; // PERF: lower sparks/fire particles
+const fxGeo = new THREE.BufferGeometry();
+const fxPos = new Float32Array(fxMax*3);
+const fxVel = new Float32Array(fxMax*3);
+const fxLife= new Float32Array(fxMax);
+const fxType= new Uint8Array(fxMax); // 0=none 1=fire 2=spark
+for(let i=0;i<fxMax;i++){ fxPos[i*3+1] = -999; fxLife[i]=0; fxType[i]=0; }
+fxGeo.setAttribute("position", new THREE.BufferAttribute(fxPos,3));
+const fxMat = new THREE.PointsMaterial({size:0.24, transparent:true, opacity:0.9, depthWrite:false});
+const fx = new THREE.Points(fxGeo, fxMat);
+scene.add(fx);
+
+function spawnFX(kind, x,y,z, vx,vy,vz, life){
+  for(let t=0;t<6;t++){
+    const i = (Math.random()*fxMax)|0;
+    if(fxLife[i] <= 0){
+      fxType[i] = kind;
+      fxPos[i*3+0]=x; fxPos[i*3+1]=y; fxPos[i*3+2]=z;
+      fxVel[i*3+0]=vx; fxVel[i*3+1]=vy; fxVel[i*3+2]=vz;
+      fxLife[i]=life;
+      return;
+    }
+  }
+}
+function boomAt(px,py,pz, power){
+  const n = Math.floor(160 + power*200);
+  for(let i=0;i<n;i++){
+    const a = Math.random()*TAU;
+    const u = Math.random();
+    const sp = (6 + 16*Math.random())*(1+power*0.6);
+    const vx = Math.cos(a)*sp*u;
+    const vz = Math.sin(a)*sp*u;
+    const vy = 5 + 9*Math.random();
+    spawnFX(2, px+(Math.random()-.5)*1.4, py+(Math.random()*.8), pz+(Math.random()-.5)*1.4, vx,vy,vz, 0.45+Math.random()*0.6);
+  }
+  fireHold = Math.max(fireHold, 1.1 + power*1.0);
+  camShake = Math.max(camShake, 0.18 + power*0.35);
+}
+function updateFX(dt){
+  const g = -12.0;
+  for(let i=0;i<fxMax;i++){
+    const life = fxLife[i];
+    if(life > 0){
+      fxLife[i] = life - dt;
+      const k = i*3;
+      fxVel[k+1] += g*dt*0.35;
+
+      fxPos[k+0] += fxVel[k+0]*dt;
+      fxPos[k+1] += fxVel[k+1]*dt;
+      fxPos[k+2] += fxVel[k+2]*dt;
+
+      if(fxLife[i] <= 0){
+        fxPos[k+1] = -999;
+        fxType[i] = 0;
+      }
+    }
+  }
+
+  if(fireHold > 0){
+    fireHold -= dt;
+    const base = car.position;
+    for(let j=0;j<14;j++){
+      const vx = (Math.random()-.5)*1.2;
+      const vz = (Math.random()-.5)*1.2;
+      const vy = 2.0 + Math.random()*2.1;
+      spawnFX(1,
+        base.x + (Math.random()-.5)*1.2,
+        0.65 + Math.random()*0.6,
+        base.z + (Math.random()-.5)*1.2,
+        vx,vy,vz,
+        0.30 + Math.random()*0.40
+      );
+    }
+  }
+  fxGeo.attributes.position.needsUpdate = true;
+}
+
+
+/* (Paste continuation inside the FIRST module script) */
+
+/* =========================
+   GT7-style wall collision (NO SPIN)
+========================= */
+const tmpBox=new THREE.Box3();
+const tmpVec=v3();
+
+function applyCrashResponse(speed){
+  dirtyRace = true;
+  if(crashCooldown > 0) return;
+
+  const kmh = speed*2.95;
+
+  camShake = Math.max(camShake, kmh < 60 ? 0.06 : 0.12);
+  crashLock = Math.max(crashLock, kmh < 60 ? 0.07 : 0.14);
+  crashCooldown = kmh < 60 ? 0.16 : 0.26;
+
+  if(kmh > 125){
+    boomAt(car.position.x, 0.85, car.position.z, clamp((kmh-125)/90, 0.35, 0.95));
+  }
+
+  carRoll += (Math.random()-.5) * (kmh > 125 ? 0.08 : 0.04);
+  carPitch += (kmh > 125 ? 0.04 : 0.02);
+}
+
+function collideWalls(speedBefore){
+  tmpBox.setFromCenterAndSize(v3(car.position.x, 0.9, car.position.z), v3(3.2,1.7,5.8)); // HITBOX: slightly smaller
+  for(const b of wallBoxes){
+    if(tmpBox.intersectsBox(b)){
+      const c=b.getCenter(tmpVec);
+      const dx=car.position.x - c.x;
+      const dz=car.position.z - c.z;
+      const len=Math.max(0.001, Math.hypot(dx,dz));
+      const nx=dx/len, nz=dz/len;
+
+      // push out
+      car.position.x += nx*0.78;
+      car.position.z += nz*0.78;
+
+      // GT7 scrub: remove velocity INTO the wall, slow down, tiny outward nudge
+      const vn = vel.x*nx + vel.z*nz;
+      if(vn < 0){
+        vel.x -= nx * vn * 1.05;
+        vel.z -= nz * vn * 1.05;
+      }
+      vel.multiplyScalar(0.72);
+      vel.x += nx * 1.2;
+      vel.z += nz * 1.2;
+
+      applyCrashResponse(speedBefore);
+      emitDust(car.position.x, car.position.z, 10);
+      return true;
+    }
+  }
+  return false;
+}
+
+/* =========================
+   Bots (AI) — same direction, mixed skill, collide with you
+========================= */
+const bots = [];
+// ===== Bot tuning (slower + safer) =====
+const BOT_SPEED_MULT = 0.30;      // ULTRA slow overall pace      // overall pace (lower = slower)
+const BOT_KMH_MIN = 55;           // minimum bot km/h           // minimum bot km/h
+const BOT_KMH_MAX = 120;          // maximum bot km/h (hard cap)          // maximum bot km/h
+const BOT_ADVANCE_SCALE = 4.2;    // ULTRA slow progress along track    // how fast bots move along track
+const BOT_WOBBLE_MULT = 0.35;     // almost no zig-zag     // reduce zig-zag
+
+const botGroup = new THREE.Group();
+scene.add(botGroup);
+
+function makeBotMesh(color=0xffffff){
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({color, roughness:0.25, metalness:0.35});
+  const carbon = new THREE.MeshStandardMaterial({color:0x111316, roughness:0.9, metalness:0.08});
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.42, 5.5), mat);
+  chassis.position.set(0,0.70,0.1);
+  chassis.castShadow=true;
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(2.7,0.10,0.6), carbon);
+  wing.position.set(0,1.05,3.0);
+  wing.castShadow=true;
+  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.95,0.25,1.6), mat);
+  nose.position.set(0,0.68,-2.7);
+  nose.castShadow=true;
+  g.add(chassis, wing, nose);
+
+  const tireGeo = new THREE.CylinderGeometry(0.55,0.55,0.58,16);
+  const tireMat = new THREE.MeshStandardMaterial({color:0x0b0e14, roughness:0.85, metalness:0.1});
+  const wheelPos = [
+    [-1.35,-1.85],[ 1.35,-1.85],
+    [-1.45, 1.75],[ 1.45, 1.75],
+  ];
+  for(const [x,z] of wheelPos){
+    const w = new THREE.Mesh(tireGeo, tireMat);
+    w.rotation.z=Math.PI/2;
+    w.position.set(x,0.60,z);
+    w.castShadow=true;
+    g.add(w);
+  }
+  return g;
+}
+
+function seedBots(count){
+  bots.length=0;
+  botGroup.clear();
+  const palette = [
+    0x0b1a3a, 0xd61b2a, 0xff7a18, 0xbfc7cf, 0x0b6b3a,
+    0x1b6cff, 0x1d6aff, 0xe9eef7, 0x00ff7a, 0x1c2a6a
+  ];
+  for(let i=0;i<count;i++){
+    const mesh = makeBotMesh(palette[i%palette.length]);
+    botGroup.add(mesh);
+
+    // Skill: some good, some bad (scaled by Difficulty)
+    const dLvl = (diff.value|0);
+    const diffMul = 0.85 + dLvl*0.10; // 0.95..1.35
+    const skill = clamp((0.35 + Math.random()*0.75)*diffMul, 0.35, 1.35); // 0.35..1.35
+    const wobble = (Math.random()*2-1) * (TRACK.width*0.10);   // lateral offset target
+    const wobbleSpeed = 0.35 + Math.random()*0.9;
+
+    // start spaced out
+    const startD = (i/(Math.max(1,count))) * totalLen * 0.85 + rng(0,120);
+    const startU = uFromDistance(startD);
+
+    bots.push({
+      mesh,
+      startD,
+      d: startD,   // distance along track
+      u: startU,
+      speed: 0,    // world speed units
+      targetKmh: (170 + skill*70 + rng(-10,10)) * (0.92 + (diff.value|0)*0.04),
+      skill,
+      wobble,
+      wobbleSpeed,
+      wobblePhase: rng(0,TAU),
+      brakeNerve: rng(0.25, 0.9),  // higher = brakes more in corners
+    });
+  }
+}
+
+function updateBot(bot, dt, now){
+  // get tangent to compute "corner-ness"
+  const u = bot.u;
+  const t = curve.getTangentAt(u).normalize();
+  // yaw computed after advancing (see below)
+
+  // corner estimate: compare tangent a bit ahead
+  const t2 = curve.getTangentAt((u + 0.008)%1).normalize();
+  const corner = clamp(1 - t.dot(t2), 0, 1); // 0 straight, 1 sharp
+
+  // bots brake in corners based on skill (good bots brake less)
+  const cornerBrake = corner * (0.65 + bot.brakeNerve*0.9) * (1.12 - bot.skill*0.55);
+
+  // target speed in km/h (slower + capped)
+  const tgt = clamp(bot.targetKmh * (1 - cornerBrake) * BOT_SPEED_MULT, BOT_KMH_MIN, BOT_KMH_MAX);
+
+  // convert km/h to our world speed units ~ (kmh/2.95)
+  const tgtWorld = (tgt / 2.95) * 0.85; // extra safety slow
+
+  // accel toward target
+  const accel = 14 + bot.skill*10; // slower acceleration response
+  bot.speed = lerp(bot.speed, tgtWorld, 1 - Math.pow(0.0002, dt*accel));
+
+  
+  bot.speed = Math.min(bot.speed, (BOT_KMH_MAX/2.95)*0.85); // hard cap world
+// advance along track
+  bot.d -= bot.speed * dt * BOT_ADVANCE_SCALE; // reverse direction to match player
+  bot.u = uFromDistance(bot.d);
+
+  // recompute tangent at NEW u (prevents wrong direction / weird wobble)
+  const tN = curve.getTangentAt(bot.u).normalize();
+  const yawBot = Math.atan2(tN.x, tN.z);
+
+  // position on centerline + lateral wobble (some bots are worse)
+  const p = curve.getPointAt(bot.u);
+  const right = v3(tN.z,0,-tN.x).normalize();
+  const wob = clamp(Math.sin(now*0.001*bot.wobbleSpeed + bot.wobblePhase) * bot.wobble * BOT_WOBBLE_MULT * (1.10 - bot.skill*0.45), -TRACK.width*0.75, TRACK.width*0.75);
+
+  bot.mesh.position.set(
+    p.x + right.x*wob,
+    0,
+    p.z + right.z*wob
+  );
+  
+  bot.mesh.position.y = 0; // keep bots grounded
+  bot.mesh.rotation.y = yawBot + Math.PI; // face forward along travel
+
+}
+
+/* =========================
+   Player vs bot collision (gentle GT7 bump)
+========================= */
+function collideBots(){
+  const pr = 1.95; // HITBOX: smaller player radius
+  for(const b of bots){
+    const br = 1.95; // HITBOX: smaller bot radius
+    const dx = car.position.x - b.mesh.position.x;
+    const dz = car.position.z - b.mesh.position.z;
+    const dist = Math.hypot(dx,dz);
+    const minD = pr + br;
+    if(dist > 0.001 && dist < minD){
+      dirtyRace = true;
+      const nx = dx/dist, nz = dz/dist;
+      const push = (minD - dist) * 0.35;
+
+      // separate PLAYER only (bots are spline-driven; moving them causes jitter)
+      car.position.x += nx*push*1.65;
+      car.position.z += nz*push*1.65;
+
+      // scrub player speed (no spin), add a tiny rebound
+      vel.multiplyScalar(0.80);
+      vel.x += nx*0.55;
+      vel.z += nz*0.55;
+
+      camShake = Math.max(camShake, 0.10);
+      crashLock = Math.max(crashLock, 0.08);
+      emitDust(car.position.x, car.position.z, 6);
+    }
+  }
+}
+
+/* =========================
+   Sound
+========================= */
+let audioCtx=null, osc=null, gain=null;
+function soundStart(){
+  if(!soundBox.checked) return;
+  if(audioCtx) return;
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  osc=audioCtx.createOscillator();
+  gain=audioCtx.createGain();
+  osc.type="sawtooth";
+  gain.gain.value=0.0001;
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start();
+}
+function soundStop(){
+  if(!audioCtx) return;
+  try{osc.stop();}catch{}
+  audioCtx.close();
+  audioCtx=null; osc=null; gain=null;
+}
+soundBox.addEventListener("change", ()=> soundBox.checked ? soundStart() : soundStop());
+function soundUpdate(speed){
+  if(!audioCtx||!osc||!gain) return;
+  const hz=90 + speed*7.0;
+  osc.frequency.setTargetAtTime(hz, audioCtx.currentTime, 0.05);
+  const vol=clamp(0.02 + speed*0.0022, 0.02, 0.12);
+  gain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.06);
+}
+function countdownBeep(go=false){
+  if(!soundBox.checked) return;
+  soundStart();
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = go ? "triangle" : "sine";
+  o.frequency.value = go ? 880 : 440;
+  g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(go ? 0.32 : 0.18, audioCtx.currentTime + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (go ? 0.34 : 0.18));
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + (go ? 0.36 : 0.20));
+}
+addEventListener("pointerdown", ()=>soundStart(), {once:true});
+
+/* =========================
+   Quality
+========================= */
+function applyQuality(){
+  const q=(qual.value|0)/100;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2)*q);
+  renderer.setSize(innerWidth, innerHeight);
+}
+applyQuality();
+applyPerf();
+const _perfEl=document.getElementById('perf'); if(_perfEl) _perfEl.addEventListener('change', applyPerf);
+
+function applyPerf(){
+  const perfBoxEl = document.getElementById("perf");
+  const on = !!(perfBoxEl && perfBoxEl.checked);
+  // Shadows are expensive. Keep sun shadows only in non-perf.
+  renderer.shadowMap.enabled = !on ? true : true; // keep on, but reduce casters
+  if(on){
+    // Reduce shadow resolution and caster load
+    if(sun?.shadow?.mapSize) sun.shadow.mapSize.set(1536,1536);
+    // Disable shadows on decorations to prevent lag spikes
+    deco?.traverse?.(o=>{
+      if(o && o.isMesh){
+        o.castShadow = false;
+        o.receiveShadow = o.receiveShadow && false;
+      }
+    });
+    // Keep important shadows: player car + track walls only (if present)
+    car?.traverse?.(o=>{ if(o && o.isMesh){ o.castShadow=true; o.receiveShadow=true; }});
+    track?.traverse?.(o=>{ if(o && o.isMesh){ o.receiveShadow=true; }});
+  }else{
+    if(sun?.shadow?.mapSize) sun.shadow.mapSize.set(2048,2048);
+  }
+  // If bloom exists, reduce it in perf mode
+  if(typeof bloomPass!=="undefined" && bloomPass){
+    bloomPass.strength = on ? Math.min(bloomPass.strength, 0.45) : bloomPass.strength;
+    bloomPass.radius   = on ? Math.min(bloomPass.radius, 0.55) : bloomPass.radius;
+  }
+  toastMsg(on ? "Performance Mode ON" : "Performance Mode OFF");
+}
+
+qual.addEventListener("input", applyQuality);
+
+
+/* (Paste continuation inside the FIRST module script) */
+
+/* =========================
+   Camera modes (chase + realistic F1 cockpit)
+========================= */
+let viewMode = 1; // 1 chase, 2 cockpit
+elView.textContent="1";
+
+addEventListener("keydown",(e)=>{
+  if(e.code==="Digit1"){ viewMode=1; elView.textContent="1"; }
+  if(e.code==="Digit2"){ viewMode=2; elView.textContent="2"; }
+});
+
+const camPos=v3(), camLook=v3();
+function setCockpitVisibility(on){
+  // With the real GLB loaded, keep the real model visible and keep old fallback geometry hidden.
+  if(realF1Loaded && realF1Model){
+    applyRealF1Visibility(on);
+    // Steering wheel shown only in cockpit view (on=true)
+    steering.visible = on;
+    return;
+  }
+
+  // Fallback procedural cockpit view if the GLB file is missing.
+  // Realistic F1 cockpit view: show halo, nose, mirrors, steering wheel, and front wheels.
+  for(const child of f1.children){
+    if(!on){ child.visible = true; continue; }
+    const n = child.name || "";
+    child.visible =
+      child === steering ||
+      n.includes("halo") ||
+      n.includes("mirror") ||
+      n.includes("long_nose") ||
+      n.includes("nose_tip") ||
+      n.includes("nose_stripe") ||
+      n.includes("front_wing") ||
+      n.includes("front_left") ||
+      n.includes("front_right");
+  }
+}
+function updateCamera(dt, now){
+  const smooth=(camSmooth.value|0)/100;
+  const follow=1 - Math.pow(0.001, dt*(0.35 + smooth*1.6));
+  camShake = Math.max(0, camShake - dt*0.85);
+
+  if(viewMode === 1){
+    setCockpitVisibility(false);
+    const behind=v3(0,6.6,14.2).applyAxisAngle(v3(0,1,0), yaw);
+    const sx = (Math.random()-.5)*camShake*1.0;
+    const sy = (Math.random()-.5)*camShake*0.7;
+    const sz = (Math.random()-.5)*camShake*1.0;
+
+    camPos.copy(car.position).add(behind).add(v3(sx,sy,sz));
+    camera.position.lerp(camPos, follow);
+
+    camLook.copy(car.position).add(v3(0,2.2,0));
+    camera.lookAt(camLook);
+  }else{
+    setCockpitVisibility(true);
+
+    // cockpit: driver eye position, looking over the real F1 nose and halo
+    const localHead = v3(0, 1.30, -0.42);
+    const bob = Math.sin(now*0.012)*0.02 + Math.sin(now*0.021)*0.012;
+    const sx = (Math.random()-.5)*camShake*0.45;
+    const sy = (Math.random()-.5)*camShake*0.40;
+    const sz = (Math.random()-.5)*camShake*0.45;
+
+    const headWorld = localHead.clone().applyAxisAngle(v3(0,1,0), yaw);
+    camPos.copy(car.position).add(headWorld).add(v3(sx, sy + bob, sz));
+    camera.position.lerp(camPos, follow*1.2);
+
+    const forward = v3(0, 0.92, -15.0).applyAxisAngle(v3(0,1,0), yaw);
+    camLook.copy(car.position).add(forward);
+    camera.lookAt(camLook);
+  }
+}
+
+/* =========================
+   Physics tuning (Upgrades affect these)
+========================= */
+const BASE_TUNE = {
+  // REALISTIC HANDLING MODEL
+  // Lower arcade grip, heavier steering, real drag, traction limits and braking weight.
+  accel:34,             // engine force / acceleration strength
+  reverse:10,
+  maxSpeed:82,
+  maxOffroad:30,
+  turnBase:0.54,        // heavier steering
+  turnSpeed:0.006,
+  grip:0.978,
+  offGrip:0.900,
+  brakePower:0.36,
+  wallSlow:0.62,
+  drag:0.010,
+  rolling:0.34,
+  lateralGrip:7.2,
+  wheelBase:3.6,
+  steerLimit:0.58,
+  steerReturn:7.5
+};
+
+function getTune(){
+  const us=SAVE.upgrades.speed|0;
+  const ua=SAVE.upgrades.accel|0;
+  const ug=SAVE.upgrades.grip|0;
+
+  // Realistic upgrades: useful but not arcade-like. Grip improves traction, not instant cornering.
+  const rainGripMul = raining ? 0.82 : 1.0;
+  const rainOffMul  = raining ? 0.88 : 1.0;
+
+  return {
+    accel: BASE_TUNE.accel + ua*2.2,
+    reverse: BASE_TUNE.reverse + ua*0.6,
+    maxSpeed: BASE_TUNE.maxSpeed + us*3.8,
+    maxOffroad: BASE_TUNE.maxOffroad + us*0.8,
+    turnBase: BASE_TUNE.turnBase + ug*0.018,
+    turnSpeed: BASE_TUNE.turnSpeed,
+    grip: clamp((BASE_TUNE.grip + ug*0.0022) * rainGripMul, 0.84, 0.991),
+    offGrip: clamp((BASE_TUNE.offGrip + ug*0.0020) * rainOffMul, 0.72, 0.965),
+    brakePower: clamp(BASE_TUNE.brakePower + ug*0.008, 0.28, 0.46),
+    wallSlow: BASE_TUNE.wallSlow,
+    drag: BASE_TUNE.drag,
+    rolling: BASE_TUNE.rolling,
+    lateralGrip: BASE_TUNE.lateralGrip + ug*0.45,
+    wheelBase: BASE_TUNE.wheelBase,
+    steerLimit: BASE_TUNE.steerLimit,
+    steerReturn: BASE_TUNE.steerReturn
+  };
+}
+
+let steerSm=0, drift=0;
+
+/* =========================
+   Racing line + Nitro (Space to use)
+   - Perfect line fills ULTRA bar (3x for longer)
+   - Good line fills NITRO bar (2x)
+========================= */
+let nitroNormal=0;   // 0..1
+let nitroUltra=0;    // 0..1
+let nitroMode=0;     // 0 none, 1 normal, 2 ultra
+let nitroTime=0;
+
+function updateNitroUI(){
+  if(ultraFill){
+    ultraFill.style.width = (nitroUltra*100).toFixed(0) + "%";
+    ultraPct.textContent = (nitroUltra*100).toFixed(0) + "%";
+  }
+  if(normalFill){
+    normalFill.style.width = (nitroNormal*100).toFixed(0) + "%";
+    normalPct.textContent = (nitroNormal*100).toFixed(0) + "%";
+  }
+}
+
+function addNitroProgress(perfectAmt, goodAmt){
+  nitroUltra  = clamp(nitroUltra  + perfectAmt, 0, 1);
+  nitroNormal = clamp(nitroNormal + goodAmt,    0, 1);
+  updateNitroUI();
+}
+
+function tryActivateNitro(){
+  if(nitroMode!==0) return;
+  if(nitroUltra>=1){
+    nitroMode=2; nitroTime=4.8; nitroUltra=0;
+    toastMsg("ULTRA NITRO!");
+  }else if(nitroNormal>=1){
+    nitroMode=1; nitroTime=3.6; nitroNormal=0;
+    toastMsg("Nitro!");
+  }
+  updateNitroUI();
+}
+
+addEventListener("keydown",(e)=>{
+  if(e.code==="Space" && state==="run"){ tryActivateNitro(); }
+});
+
+
+/* =========================
+   Race state — real checkpoint laps + finish line
+========================= */
+let state="menu"; // menu | countdown | run | pause
+let raining=false; let rainT=0;
+let lapsTotal=3;
+let lap=1;
+let best=SAVE.bestTime ?? null;
+let tStart=0;
+let pausedAt=0;
+
+lapsTotal = 3;
+if(lapsSet){ lapsSet.value="3"; }
+if(lapsLabel){ lapsLabel.textContent="3"; }
+elLaps.textContent=String(lapsTotal);
+elLap.textContent="1";
+elBest.textContent=(best===null)?"--":best.toFixed(2)+"s";
+
+let lastU=0; // for lap wrap detect
+let lapStartDist=0;
+let earnedSinceSave=0;
+
+// PRO loop vars
+let dirtyRace=false; // becomes true on wall hit or bot bump
+let countdownAt=0;
+let countdownPhase=-1;
+let playerD=0; // race distance progress
+let prevUD=0;
+let lapGateArmed=false; // old safety variable, kept for compatibility
+let lapCheckpointMask=0; // 1=25%, 2=50%, 4=75%; all 3 required before finish counts
+let wasInFinishZone=false;
+let champActive=false;
+let champIndex=0;
+let champPoints=0;
+const CHAMP_RACES = [
+  {name:"Race 1 — Sprint", laps:2, bots:6},
+  {name:"Race 2 — Traffic", laps:3, bots:10},
+  {name:"Race 3 — Long Run", laps:4, bots:8},
+  {name:"Race 4 — Pressure", laps:5, bots:12},
+  {name:"Race 5 — Finale", laps:6, bots:12},
+];
+function pointsForPos(pos){
+  const table=[25,18,15,12,10,8,6,4,2,1];
+  return table[Math.min(table.length-1, Math.max(0,pos-1))] || 0;
+}
+
+function resetRun(){
+  // Race is always 3 laps now. The race ends immediately after lap 3.
+  lapsTotal = 3;
+  if(lapsSet){ lapsSet.value = "3"; }
+  if(lapsLabel){ lapsLabel.textContent = "3"; }
+  elLaps.textContent=String(lapsTotal);
+
+  spawnAt(0);
+  steerSm=0; drift=0;
+  skidCount=0; skidGeo.setDrawRange(0,0);
+  lap=1;
+  elLap.textContent="1";
+
+  lastU = closestU(car.position, 260);
+  lapStartDist = distanceFromU(lastU);
+  earnedSinceSave = 0;
+
+  dirtyRace = false;
+  playerD = 0;
+  prevUD = closestU(car.position, 220);
+  lapGateArmed = false;
+  lapCheckpointMask = 0;
+  wasInFinishZone = (lastU < 0.08 || lastU > 0.92);
+
+  tStart=performance.now();
+}
+
+const pauseMenu = $("pauseMenu"), btnPauseContinue = $("btnPauseContinue"), btnPauseQuit = $("btnPauseQuit");
+function openPauseMenu(){
+  if(state!=="run") return;
+  state="pause";
+  pausedAt=performance.now();
+  if(pauseMenu) pauseMenu.style.display="flex";
+  toastMsg("Paused");
+}
+function closePauseMenu(){
+  if(state!=="pause") return;
+  state="run";
+  const pausedFor=performance.now()-pausedAt;
+  tStart += pausedFor;
+  if(pauseMenu) pauseMenu.style.display="none";
+}
+function quitRaceToMenu(){
+  state="menu";
+  if(pauseMenu) pauseMenu.style.display="none";
+  hideResults();
+  menu.style.display="flex";
+  rebuildMenuUI();
+  toastMsg("Quit race");
+}
+function togglePause(){
+  if(state==="run") openPauseMenu();
+  else if(state==="pause") closePauseMenu();
+}
+if(btnPauseContinue) btnPauseContinue.addEventListener("pointerdown", (e)=>{ e.preventDefault(); closePauseMenu(); });
+if(btnPauseQuit) btnPauseQuit.addEventListener("pointerdown", (e)=>{ e.preventDefault(); quitRaceToMenu(); });
+
+addEventListener("keydown",(e)=>{
+  if(e.code==="Escape" && (state==="run"||state==="pause")){ e.preventDefault(); togglePause(); }
+  if(e.code==="KeyP" && (state==="run"||state==="pause")){ e.preventDefault(); togglePause(); }
+  if(e.code==="KeyR" && state!=="menu"){ resetRun(); toastMsg("Reset"); }
+});
+
+function showStartLights(){
+  startLights.style.display="flex";
+  startText.textContent="READY";
+  for(const el of Ls){ el.className="light"; }
+}
+function hideStartLights(){ startLights.style.display="none"; }
+function startCountdown(){
+  state = "countdown";
+  countdownAt = performance.now();
+  countdownPhase = -1;
+  showStartLights();
+}
+function prepareRun(){
+  const isChamp = (modeSel.value|0)===1;
+  champActive = isChamp;
+  if(isChamp){
+    const race = CHAMP_RACES[champIndex] || CHAMP_RACES[0];
+    botsRange.value = String(race.bots);
+    botCountLabel.textContent = String(race.bots);
+    lapsSet.value = String(race.laps);
+    lapsLabel.textContent = String(race.laps);
+  }
+  menu.style.display = "none";
+  state = "run"; // temporarily for reset
+  resetRun();
+  seedBots(botsRange.value|0);
+  soundStart();
+  state = "countdown";
+}
+function startGame(){
+  prepareRun();
+  startCountdown();
+}
+
+
+// Make sure menu doesn't steal the click
+menu.addEventListener("pointerdown", (e)=>{
+  // only block clicks that are NOT inside the panel
+  const panel = menu.querySelector(".panel");
+  if(panel && !panel.contains(e.target)){
+    e.preventDefault();
+    e.stopPropagation();
+  }
+});
+
+btnPlay.addEventListener("click", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if((modeSel.value|0)===1){ champIndex=0; champPoints=0; }
+  startGame();
+});
+
+btnPlay.addEventListener("pointerup", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if((modeSel.value|0)===1){ champIndex=0; champPoints=0; }
+  startGame();
+});
+function updateCountdown(now){
+  const t = (now - countdownAt)/1000;
+  let phase = 0;
+  if(t < 0.15) phase = 0;
+  else if(t < 0.30) phase = 1;
+  else if(t < 0.45) phase = 2;
+  else if(t < 0.60) phase = 3;
+  else if(t < 0.75) phase = 4;
+  else if(t < 1.05) phase = 5; // all on
+  else if(t < 1.35) phase = 6; // GO!
+  else phase = 7;
+
+  if(phase !== countdownPhase){
+    countdownPhase = phase;
+    for(let i=0;i<5;i++){
+      const el = Ls[i];
+      el.className = "light" + ((phase>=i+1 && phase<=5) ? " on" : "");
+      if(phase>=6) el.className = "light go";
+    }
+    if(phase===1){ startText.textContent = "3"; countdownBeep(false); }
+    else if(phase===3){ startText.textContent = "2"; countdownBeep(false); }
+    else if(phase===5){ startText.textContent = "1"; countdownBeep(false); }
+    else if(phase===6){ startText.textContent = "GO!"; countdownBeep(true); }
+    else if(phase<6) startText.textContent = "READY";
+    else startText.textContent = "";
+  }
+
+  if(phase>=7){
+    hideStartLights();
+    state="run";
+    tStart = performance.now();
+  }
+}
+
+/* =========================
+   Currency earn + finish
+========================= */
+function awardCR(amount){
+  if(!isFinite(amount) || amount<=0) return;
+  SAVE.cr += amount;
+  earnedSinceSave += amount;
+  elCR.textContent = String(Math.floor(SAVE.cr));
+  menuCR.textContent = String(Math.floor(SAVE.cr));
+  if(earnedSinceSave >= 60){
+    earnedSinceSave = 0;
+    saveNow("Auto-saved");
+    rebuildMenuUI();
+  }
+}
+function computePosition(){
+  const playerRaceD = (lap-1)*totalLen + playerD;
+  let ahead = 0;
+  for(const b of bots){
+    const botRaceD = (b.d - (b.startD||0));
+    if(botRaceD > playerRaceD) ahead++;
+  }
+  return 1 + ahead;
+}
+function showResults(data){
+  results.style.display="flex";
+  resTitle.textContent = data.title;
+  resSub.textContent = data.sub;
+  resCR.textContent = String(Math.floor(SAVE.cr));
+  resPos.textContent = String(data.pos) + " / " + String((bots.length+1));
+  resTime.textContent = data.time.toFixed(2) + "s";
+  resBest.textContent = (best===null) ? "--" : best.toFixed(2) + "s";
+  resClean.textContent = data.clean ? "YES ✅" : "NO";
+  rFinish.textContent = String(Math.floor(data.rFinish));
+  rPos.textContent = String(Math.floor(data.rPos));
+  rClean.textContent = String(Math.floor(data.rClean));
+  rChamp.textContent = String(Math.floor(data.rChamp));
+  rTotal.textContent = String(Math.floor(data.totalEarned));
+  resMode.textContent = champActive ? "Championship" : "Quick Race";
+  if(champActive){
+    resChamp.textContent = `Race ${champIndex+1}/5 • Points: ${champPoints}`;
+    btnResNext.textContent = (champIndex>=4) ? "Finish Championship" : "Next Race";
+  }else{
+    resChamp.textContent = "—";
+    btnResNext.textContent = "Race Again";
+  }
+}
+function hideResults(){ results.style.display="none"; }
+
+btnResMenu.addEventListener("pointerdown", ()=>{
+  hideResults();
+  state="menu";
+  menu.style.display="flex";
+  rebuildMenuUI();
+});
+btnResNext.addEventListener("pointerdown", ()=>{
+  hideResults();
+  if(champActive){
+    if(champIndex>=4){
+      champActive=false;
+      champIndex=0;
+      const bonus = 600 + champPoints*18;
+      awardCR(bonus);
+      saveNow("Championship complete!");
+      toastMsg("CHAMPION! +CR");
+      state="menu";
+      menu.style.display="flex";
+      rebuildMenuUI();
+      return;
+    }else{
+      champIndex++;
+    }
+  }
+  prepareRun();
+  startCountdown();
+});
+
+function finishRace(){
+  state="menu";
+  if(pauseMenu) pauseMenu.style.display="none";
+  menu.style.display="none";
+
+  const t=(performance.now()-tStart)/1000;
+  if(best===null || t<best) best=t;
+  SAVE.bestTime = best;
+
+  const pos = computePosition();
+  const baseFinish = 220 + lapsTotal*85;
+  const posMul = clamp(1.40 - (pos-1)*0.08, 0.60, 1.40);
+  const posBonus = Math.max(0, Math.floor(baseFinish*posMul - baseFinish));
+  const clean = !dirtyRace;
+  const cleanBonus = clean ? Math.floor(120 + lapsTotal*25) : 0;
+
+  let champPts = 0;
+  if(champActive){
+    champPts = pointsForPos(pos);
+    champPoints += champPts;
+  }
+
+  const earned = baseFinish + posBonus + cleanBonus;
+  awardCR(earned);
+
+  saveNow("Race finished!");
+  elBest.textContent=(best===null)?"--":best.toFixed(2)+"s";
+  rebuildMenuUI();
+
+  showResults({
+    title: champActive ? "Championship Results" : "Race Results",
+    sub: champActive ? (CHAMP_RACES[champIndex]?.name || "Championship") : "Nice driving.",
+    pos,
+    time:t,
+    clean,
+    rFinish:baseFinish,
+    rPos:posBonus,
+    rClean:cleanBonus,
+    rChamp:champPts,
+    totalEarned:earned
+  });
+}
+
+
+/* =========================
+   Driving
+========================= */
+function stepDriving(dt, now){
+  const TUNE = getTune();
+  const inp=getInput();
+
+  if(crashLock > 0) crashLock = Math.max(0, crashLock - dt);
+  if(crashCooldown > 0) crashCooldown = Math.max(0, crashCooldown - dt);
+
+  const road = onRoad(car.position);
+  const roadGrip = road ? 1.0 : 0.42;
+  const speed=vel.length();
+
+  // Heavier, realistic steering: slower input response and reduced steering at high speed.
+  const steerResponse = 1 - Math.pow(0.0007, dt);
+  steerSm = lerp(steerSm, inp.steer, steerResponse);
+
+  const forward=v3(0,0,-1).applyAxisAngle(v3(0,1,0), yaw).normalize();
+  const right=v3(1,0,0).applyAxisAngle(v3(0,1,0), yaw).normalize();
+
+  let forwardSpeed = vel.dot(forward);
+  let lateralSpeed = vel.dot(right);
+
+  // Controls: W = throttle. Space/S = braking. S reverses only when almost stopped.
+  const throttle = inp.up ? 1 : 0;
+  const braking = inp.brake || (inp.down && forwardSpeed > 2.0);
+  const reversing = inp.down && forwardSpeed < 2.5 && !inp.brake;
+
+  // Engine torque fades near top speed, like a real car reaching gearing/drag limit.
+  const speedRatio = clamp(Math.abs(forwardSpeed) / Math.max(1, TUNE.maxSpeed), 0, 1.4);
+  const torqueCurve = clamp(1 - Math.pow(speedRatio, 1.65), 0.08, 1);
+  if(throttle>0){
+    vel.addScaledVector(forward, TUNE.accel * torqueCurve * dt * roadGrip * (crashLock>0 ? 0.35 : 1));
+  }
+  if(reversing){
+    vel.addScaledVector(forward, -TUNE.reverse * dt * roadGrip);
+  }
+
+  // Real braking: strong longitudinal slowing, not instant arcade stop.
+  if(braking){
+    const brake = clamp(TUNE.brakePower * dt * 3.8, 0, 0.16);
+    forwardSpeed = vel.dot(forward);
+    lateralSpeed = vel.dot(right);
+    forwardSpeed *= (1 - brake);
+    vel.copy(forward.clone().multiplyScalar(forwardSpeed).add(right.clone().multiplyScalar(lateralSpeed)));
+    carPitch = Math.max(carPitch, 0.035); // nose dip under braking
+  }
+
+  // Nitro stays in the game, but realistic mode makes it a mild push, not rocket speed.
+  let nitroMul = 1;
+  if(nitroMode===1) nitroMul = 1.10;
+  if(nitroMode===2) nitroMul = 1.18;
+  if(nitroMode!==0 && throttle>0){
+    vel.addScaledVector(forward, TUNE.accel * 0.38 * nitroMul * dt * roadGrip);
+  }
+
+  // Slip-angle traction model.
+  forwardSpeed = vel.dot(forward);
+  lateralSpeed = vel.dot(right);
+  const absForward = Math.abs(forwardSpeed);
+  const slipAngle = Math.atan2(lateralSpeed, Math.max(4, absForward));
+  const steerLoad = Math.abs(steerSm) * clamp(absForward/38, 0, 1);
+  const brakingLoad = braking ? 0.22 : 0;
+  const tractionBudget = clamp(TUNE.grip * roadGrip - steerLoad*0.18 - brakingLoad, 0.30, 0.99);
+
+  // Lateral velocity bleeds off based on tire grip. Too much speed + steering = understeer/slide.
+  const lateralGrip = TUNE.lateralGrip * tractionBudget;
+  const lateralKill = clamp(lateralGrip * dt, 0, 0.42);
+  lateralSpeed *= (1 - lateralKill);
+
+  // Rebuild velocity from realistic local components.
+  vel.copy(forward.clone().multiplyScalar(forwardSpeed).add(right.clone().multiplyScalar(lateralSpeed)));
+
+  // Bicycle-like yaw: steering becomes less effective when sliding or too fast.
+  const speedSteerLimit = clamp(1 - absForward / (TUNE.maxSpeed*1.28), 0.24, 1.0);
+  const slipPenalty = clamp(1 - Math.abs(slipAngle)*1.55, 0.25, 1);
+  const steerAngle = steerSm * TUNE.steerLimit * speedSteerLimit;
+  const yawRate = (forwardSpeed / TUNE.wheelBase) * Math.tan(steerAngle) * slipPenalty * roadGrip;
+  const lockMul = (crashLock>0) ? 0.35 : 1.0;
+  yaw -= yawRate * dt * lockMul;
+  car.rotation.y = yaw;
+
+  // Drag + rolling resistance. This makes top speed and coasting feel natural.
+  const sp = vel.length();
+  if(sp > 0.001){
+    const dragForce = (TUNE.drag * sp * sp + TUNE.rolling) * dt;
+    vel.addScaledVector(vel.clone().normalize(), -Math.min(sp, dragForce));
+  }
+
+  const maxSpBase = road ? TUNE.maxSpeed : TUNE.maxOffroad;
+  const maxSp = maxSpBase * nitroMul;
+  if(vel.length()>maxSp) vel.setLength(maxSp);
+
+  // Racing line check (still rewards clean, realistic driving)
+  const uRL = closestU(car.position, 220);
+  const pRL = curve.getPointAt(uRL);
+  const dxRL = car.position.x - pRL.x;
+  const dzRL = car.position.z - pRL.z;
+  const dRL = Math.hypot(dxRL, dzRL);
+  if(speed > 8){
+    if(dRL < 1.8){
+      addNitroProgress(dt*0.13, dt*0.01);
+    }else if(dRL < 5.5){
+      addNitroProgress(0, dt*0.08);
+    }
+  }
+
+  // move
+  car.position.addScaledVector(vel, dt);
+
+  // wall collision (realistic scrub)
+  collideWalls(speed);
+
+  // bot collision
+  collideBots();
+
+  // Body roll/pitch based on real forces: roll in corners, pitch under throttle/braking.
+  const lateralG = clamp(lateralSpeed * 0.018, -0.16, 0.16);
+  const targetRoll = -steerSm * clamp(speed/55,0,1) * 0.10 - lateralG;
+  const targetPitch = braking ? 0.055 : (throttle ? -0.018 : 0);
+  carRoll = lerp(carRoll, targetRoll, 1 - Math.pow(0.004, dt));
+  carPitch = lerp(carPitch, targetPitch, 1 - Math.pow(0.006, dt));
+
+  const bob = 0.08 + Math.min(0.14, vel.length()*0.0035);
+
+  // FULL REALISM UPGRADE: the old arcade patch referenced a missing `chassis`.
+  // The visual F1 model now rides on the `f1` group instead, so no crash.
+  f1.position.y = Math.sin(now*0.018)*bob*0.10;
+  f1.rotation.z = carRoll * 0.42;
+  f1.rotation.x = carPitch * 0.32;
+
+  // Real F1 cockpit feedback: steering wheel and front tires visibly steer.
+  const steerVisual = steerSm * 0.42;
+  steering.rotation.y = lerp(steering.rotation.y, steerSm * 0.62, 1 - Math.pow(0.001, dt*60));
+  wFL.rotation.y = lerp(wFL.rotation.y, steerVisual, 1 - Math.pow(0.0012, dt*60));
+  wFR.rotation.y = lerp(wFR.rotation.y, steerVisual, 1 - Math.pow(0.0012, dt*60));
+
+  // Suspension movement: tiny but visible compression from speed, braking, and cornering load.
+  const speedLoad = clamp(speed/85, 0, 1);
+  const brakeDive = braking ? 0.055*speedLoad : 0;
+  const accelSquat = throttle ? 0.026*speedLoad : 0;
+  const sideLoad = clamp(steerSm * speedLoad * 0.055, -0.055, 0.055);
+  const roadBuzz = Math.sin(now*0.045)*0.010*speedLoad + Math.sin(now*0.081)*0.006*speedLoad;
+
+  wFL.position.y = 0.62 - brakeDive + roadBuzz + sideLoad;
+  wFR.position.y = 0.62 - brakeDive + roadBuzz - sideLoad;
+  wBL.position.y = 0.62 - accelSquat + roadBuzz*0.7 + sideLoad*0.45;
+  wBR.position.y = 0.62 - accelSquat + roadBuzz*0.7 - sideLoad*0.45;
+
+  // Wheel roll speed matches real vehicle speed.
+  const roll = vel.length()*dt*1.58;
+  for(const w of [wFL,wFR,wBL,wBR]){
+    const tire=w.children[0];
+    const rim=w.children[1];
+    const disc=w.children[2];
+    if(tire) tire.rotation.x -= roll;
+    if(rim) rim.rotation.x -= roll;
+    if(disc) disc.rotation.x -= roll*0.65;
+  }
+
+  const kmh = vel.length()*2.95;
+
+  // skids only when grip is genuinely exceeded.
+  drift = lerp(drift, clamp(Math.abs(slipAngle)*2.4, 0, 1), 1 - Math.pow(0.002, dt));
+  const skidding = (Math.abs(slipAngle)>0.22 && speed>18) || (braking && speed>24 && Math.abs(steerSm)>0.25);
+  if(skidding){
+    addSkidPoint(car.position.x-1.1, 0.035, car.position.z);
+    addSkidPoint(car.position.x+1.1, 0.035, car.position.z);
+    dirtyRace = true;
+  }
+
+  // dust
+  if(!road && speed>8) emitDust(car.position.x, car.position.z, 5);
+  else if(skidding && speed>20) emitDust(car.position.x, car.position.z, 2);
+
+  for(let i=0;i<dustCount;i++){
+    if(dustLife[i]>0){
+      dustLife[i]-=dt;
+      dustPos[i*3+1]+=dt*0.8;
+      if(dustLife[i]<=0) dustPos[i*3+1]=-999;
+    }
+  }
+  dustGeo.attributes.position.needsUpdate=true;
+
+  // Earn currency: distance + speed (small)
+  awardCR( (speed*dt*0.45) + (road? dt*0.13 : dt*0.04) );
+
+  // REAL LAP LOGIC: a lap only counts after checkpoints 1, 2, and 3, then crossing the finish line.
+  const uNow = closestU(car.position, 320);
+
+  {
+    const du = distanceFromU(uNow) - distanceFromU(prevUD);
+    let add = du;
+    if(add < -totalLen*0.25) add += totalLen;
+    if(add >  totalLen*0.25) add -= totalLen;
+    playerD += add;
+    prevUD = uNow;
+  }
+
+  if(uNow > 0.20 && uNow < 0.36) lapCheckpointMask |= 1;
+  if(uNow > 0.44 && uNow < 0.61) lapCheckpointMask |= 2;
+  if(uNow > 0.68 && uNow < 0.86) lapCheckpointMask |= 4;
+
+  const inFinishZone = (uNow < 0.085 || uNow > 0.925);
+  const justEnteredFinish = inFinishZone && !wasInFinishZone;
+
+  if(justEnteredFinish && lapCheckpointMask === 7){
+    lapCheckpointMask = 0;
+    if(lap >= lapsTotal){
+      elLap.textContent=String(lapsTotal);
+      awardCR(250 + lapsTotal*70);
+      finishRace();
+      return;
+    }else{
+      lap++;
+      awardCR(120);
+      elLap.textContent=String(lap);
+      toastMsg(`Lap ${lap}/${lapsTotal}  +CR`);
+    }
+  }
+
+  wasInFinishZone = inFinishZone;
+  lastU = uNow;
+
+  if(nitroMode!==0){
+    nitroTime -= dt;
+    if(nitroTime<=0){ nitroMode=0; nitroTime=0; }
+  }
+
+  // HUD
+  elSpeed.textContent=String(Math.round(kmh));
+  elTime.textContent=(((now-tStart)/1000)).toFixed(2);
+  elBest.textContent=(best===null) ? "--" : best.toFixed(2)+"s";
+  soundUpdate(vel.length());
+
+  // camera
+  updateCamera(dt, now);
+}
+
+
+/* (Paste continuation inside the FIRST module script) */
+
+/* =========================
+   Main loop
+========================= */
+let last=performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt=Math.min(0.022, (now-last)/1000); // stability cap
+
+  // Multiplayer: smooth other players + send our state (~20Hz)
+  if(mp.connected && mp.room){
+    const follow = 1 - Math.pow(0.001, dt*8.0);
+    for(const p of mp.peers.values()){
+      p.mesh.position.lerp(p.targetPos, follow);
+      const cur = p.mesh.rotation.y;
+      let target = p.targetYaw;
+      let d = (target - cur) % (Math.PI*2);
+      if(d > Math.PI) d -= Math.PI*2;
+      if(d < -Math.PI) d += Math.PI*2;
+      p.mesh.rotation.y = cur + d*follow;
+    }
+
+    mp.sendAcc += dt;
+    if(mp.sendAcc >= 0.05 && state==="run"){
+      mp.sendAcc = 0;
+      const team = TEAM_LIST.find(t=>t.id===SAVE.teamId) || TEAM_LIST[0];
+      const s = { x: car.position.x, z: car.position.z, yaw: yaw, v: vel.length(), c: team.color };
+      try{ mp.ws?.send(JSON.stringify({t:"state", s})); }catch{}
+    }
+  }
+
+  last=now;
+
+  if(state==="countdown"){
+    updateCountdown(now);
+    updateCamera(dt, now);
+  }else if(state==="run"){
+    // RAIN CYCLE: every ~20s start rain for ~7s
+    rainT += dt;
+    if(!raining && rainT>=20){ raining=true; rainT=0; toastMsg('RAIN! More drift'); }
+    if(raining && rainT>=7){ raining=false; rainT=0; toastMsg('Dry track'); }
+
+    // update bots first so collisions feel consistent
+    for(const b of bots) updateBot(b, dt, now);
+    stepDriving(dt, now);
+  }
+
+  updateFX(dt);
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(loop);
+
+addEventListener("resize", ()=>{
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+/* =========================
+   Start: show menu (already visible)
+========================= */
+menu.style.display="flex";
+menuCR.textContent=String(Math.floor(SAVE.cr));
+elCR.textContent=String(Math.floor(SAVE.cr));
+elBest.textContent=(best===null)?"--":best.toFixed(2)+"s";
+
+
+</script>
+</body>
+</html>
+// --- Deco safety + performance polish (prevents houses on track, reduces lag)
+function lateralFromTrack(pos){
+  const u=closestU(pos, 220);
+  const p=curve.getPointAt(u);
+  const t=curve.getTangentAt(u).normalize();
+  const right=v3(t.z,0,-t.x).normalize();
+  const rel=pos.clone().sub(p);
+    const rainGripMul = raining ? 0.92 : 1.0;
+  const rainOffMul  = raining ? 0.965 : 1.0;
+  return {u, p, right, lateral: rel.dot(right)};
+}
+function fixDeco(){
+  const SAFE = TRACK.width + TRACK.curb + 5.5; // keep big props away from racing line
+  const KEEP = TRACK.width + TRACK.curb + 2.0; // trees can be closer
+  const toRemove = [];
+  deco.traverse((obj)=>{
+    if(!obj.isMesh) return;
+    // performance: far props don't cast shadows
+    obj.castShadow = false;
+    // only big stuff is risky
+    const name = obj.parent?.name || "";
+  });
+  // push whole groups (houses/fences) away from track if too close
+  for(const child of [...deco.children]){
+    // detect "house" groups by having many meshes or a big Y size
+    let isHouseish=false;
+    if(child.isGroup){
+      const box=new THREE.Box3().setFromObject(child);
+      const size=new THREE.Vector3(); box.getSize(size);
+      isHouseish = (size.y>8) || (child.children.length>10);
+      const center=new THREE.Vector3(); box.getCenter(center);
+      const info=lateralFromTrack(center);
+      const lim = isHouseish ? SAFE : KEEP;
+      if(Math.abs(info.lateral) < lim){
+        // move outward along track right direction
+        const sign = info.lateral>=0 ? 1 : -1;
+        const push = (lim - Math.abs(info.lateral)) + 6.0;
+        child.position.x += info.right.x * sign * push;
+        child.position.z += info.right.z * sign * push;
+      }
+      // also clamp Y so nothing "floats"
+      child.position.y = 0;
+      // near track: enable shadows for a few closest big props only
+      const dist2 = center.distanceTo(curve.getPointAt(info.u));
+      if(isHouseish && dist2 < 120){
+        child.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; }});
+      }
+    }
+  }
+}
+fixDeco();
+
