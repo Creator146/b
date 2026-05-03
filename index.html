@@ -2729,60 +2729,66 @@ function addBox(parent, name, geo, mat, x,y,z, sx=1,sy=1,sz=1){
   return m;
 }
 
+// All procedural fallback geometry lives in f1Fallback.
+// When the real GLB loads, we simply set f1Fallback.visible = false.
+const f1Fallback = new THREE.Group();
+f1Fallback.name = "f1_fallback";
+f1.add(f1Fallback);
+
 // REAL F1-STYLE VISUAL MODEL — open wheels, long nose, aero wings, sidepods, halo, mirrors, suspension.
-const floor = addBox(f1, "f1_floor", new THREE.BoxGeometry(2.45, 0.08, 6.95), carbonMat, 0, 0.47, 0.15);
-const plank = addBox(f1, "f1_plank", new THREE.BoxGeometry(0.72, 0.045, 6.25), bodyDark, 0, 0.425, 0.25);
+const floor = addBox(f1Fallback, "f1_floor", new THREE.BoxGeometry(2.45, 0.08, 6.95), carbonMat, 0, 0.47, 0.15);
+const plank = addBox(f1Fallback, "f1_plank", new THREE.BoxGeometry(0.72, 0.045, 6.25), bodyDark, 0, 0.425, 0.25);
 
-const monocoque = addBox(f1, "f1_monocoque", new THREE.BoxGeometry(1.32, 0.48, 2.05), bodyPaint, 0, 0.78, -0.75);
-const survivalCell = addBox(f1, "f1_survival_cell", new THREE.BoxGeometry(1.55, 0.56, 1.38), bodyPaint, 0, 0.84, 0.20);
-const engineCover = addBox(f1, "f1_engine_cover", new THREE.BoxGeometry(1.02, 0.72, 2.55), bodyPaint, 0, 0.96, 1.82);
-const sharkFin = addBox(f1, "f1_shark_fin", new THREE.BoxGeometry(0.12, 0.98, 1.55), bodyPaint, 0, 1.42, 2.15);
-const airbox = addBox(f1, "f1_airbox", new THREE.BoxGeometry(0.62, 0.30, 0.50), bodyDark, 0, 1.44, 0.85);
+const monocoque = addBox(f1Fallback, "f1_monocoque", new THREE.BoxGeometry(1.32, 0.48, 2.05), bodyPaint, 0, 0.78, -0.75);
+const survivalCell = addBox(f1Fallback, "f1_survival_cell", new THREE.BoxGeometry(1.55, 0.56, 1.38), bodyPaint, 0, 0.84, 0.20);
+const engineCover = addBox(f1Fallback, "f1_engine_cover", new THREE.BoxGeometry(1.02, 0.72, 2.55), bodyPaint, 0, 0.96, 1.82);
+const sharkFin = addBox(f1Fallback, "f1_shark_fin", new THREE.BoxGeometry(0.12, 0.98, 1.55), bodyPaint, 0, 1.42, 2.15);
+const airbox = addBox(f1Fallback, "f1_airbox", new THREE.BoxGeometry(0.62, 0.30, 0.50), bodyDark, 0, 1.44, 0.85);
 
-const nose = addBox(f1, "f1_long_nose", new THREE.BoxGeometry(0.72, 0.26, 2.92), bodyPaint, 0, 0.66, -2.82);
-const noseTip = addBox(f1, "f1_nose_tip", new THREE.BoxGeometry(0.36, 0.16, 0.82), bodyPaint, 0, 0.59, -4.45);
-const noseStripe = addBox(f1, "f1_nose_stripe", new THREE.BoxGeometry(0.08, 0.012, 3.10), carbonMat, 0, 0.802, -3.02);
+const nose = addBox(f1Fallback, "f1_long_nose", new THREE.BoxGeometry(0.72, 0.26, 2.92), bodyPaint, 0, 0.66, -2.82);
+const noseTip = addBox(f1Fallback, "f1_nose_tip", new THREE.BoxGeometry(0.36, 0.16, 0.82), bodyPaint, 0, 0.59, -4.45);
+const noseStripe = addBox(f1Fallback, "f1_nose_stripe", new THREE.BoxGeometry(0.08, 0.012, 3.10), carbonMat, 0, 0.802, -3.02);
 
 // Multi-element front wing
-const fwMain = addBox(f1, "f1_front_wing_main", new THREE.BoxGeometry(4.28, 0.08, 0.62), carbonMat, 0, 0.40, -4.98);
-const fwFlap1 = addBox(f1, "f1_front_wing_flap1", new THREE.BoxGeometry(4.05, 0.055, 0.42), bodyPaint, 0, 0.52, -4.72);
-const fwFlap2 = addBox(f1, "f1_front_wing_flap2", new THREE.BoxGeometry(3.65, 0.045, 0.32), carbonMat, 0, 0.62, -4.50);
-const fwEndL = addBox(f1, "f1_front_endplate_L", new THREE.BoxGeometry(0.10, 0.62, 0.86), carbonMat, -2.12, 0.56, -4.78);
-const fwEndR = addBox(f1, "f1_front_endplate_R", new THREE.BoxGeometry(0.10, 0.62, 0.86), carbonMat,  2.12, 0.56, -4.78);
+const fwMain = addBox(f1Fallback, "f1_front_wing_main", new THREE.BoxGeometry(4.28, 0.08, 0.62), carbonMat, 0, 0.40, -4.98);
+const fwFlap1 = addBox(f1Fallback, "f1_front_wing_flap1", new THREE.BoxGeometry(4.05, 0.055, 0.42), bodyPaint, 0, 0.52, -4.72);
+const fwFlap2 = addBox(f1Fallback, "f1_front_wing_flap2", new THREE.BoxGeometry(3.65, 0.045, 0.32), carbonMat, 0, 0.62, -4.50);
+const fwEndL = addBox(f1Fallback, "f1_front_endplate_L", new THREE.BoxGeometry(0.10, 0.62, 0.86), carbonMat, -2.12, 0.56, -4.78);
+const fwEndR = addBox(f1Fallback, "f1_front_endplate_R", new THREE.BoxGeometry(0.10, 0.62, 0.86), carbonMat,  2.12, 0.56, -4.78);
 
 // Sidepods with dark intakes
-const sideL = addBox(f1, "f1_sidepod_L", new THREE.BoxGeometry(0.92, 0.42, 2.25), bodyPaint, -1.10, 0.78, 0.82);
-const sideR = addBox(f1, "f1_sidepod_R", new THREE.BoxGeometry(0.92, 0.42, 2.25), bodyPaint,  1.10, 0.78, 0.82);
-const intakeL = addBox(f1, "f1_sidepod_intake_L", new THREE.BoxGeometry(0.08, 0.28, 0.72), carbonMat, -1.59, 0.88, -0.10);
-const intakeR = addBox(f1, "f1_sidepod_intake_R", new THREE.BoxGeometry(0.08, 0.28, 0.72), carbonMat,  1.59, 0.88, -0.10);
-const bargeL = addBox(f1, "f1_bargeboard_L", new THREE.BoxGeometry(0.08, 0.56, 0.90), carbonMat, -1.72, 0.72, -0.52);
-const bargeR = addBox(f1, "f1_bargeboard_R", new THREE.BoxGeometry(0.08, 0.56, 0.90), carbonMat,  1.72, 0.72, -0.52);
+const sideL = addBox(f1Fallback, "f1_sidepod_L", new THREE.BoxGeometry(0.92, 0.42, 2.25), bodyPaint, -1.10, 0.78, 0.82);
+const sideR = addBox(f1Fallback, "f1_sidepod_R", new THREE.BoxGeometry(0.92, 0.42, 2.25), bodyPaint,  1.10, 0.78, 0.82);
+const intakeL = addBox(f1Fallback, "f1_sidepod_intake_L", new THREE.BoxGeometry(0.08, 0.28, 0.72), carbonMat, -1.59, 0.88, -0.10);
+const intakeR = addBox(f1Fallback, "f1_sidepod_intake_R", new THREE.BoxGeometry(0.08, 0.28, 0.72), carbonMat,  1.59, 0.88, -0.10);
+const bargeL = addBox(f1Fallback, "f1_bargeboard_L", new THREE.BoxGeometry(0.08, 0.56, 0.90), carbonMat, -1.72, 0.72, -0.52);
+const bargeR = addBox(f1Fallback, "f1_bargeboard_R", new THREE.BoxGeometry(0.08, 0.56, 0.90), carbonMat,  1.72, 0.72, -0.52);
 
 // Cockpit: halo, headrest, mirrors, realistic cockpit camera pieces
-const cockpitTub = addBox(f1, "f1_cockpit_tub", new THREE.BoxGeometry(1.04, 0.32, 1.10), bodyDark, 0, 1.00, -0.58);
-const headrest = addBox(f1, "f1_headrest", new THREE.BoxGeometry(0.70, 0.30, 0.38), blackMat, 0, 1.18, -0.05);
+const cockpitTub = addBox(f1Fallback, "f1_cockpit_tub", new THREE.BoxGeometry(1.04, 0.32, 1.10), bodyDark, 0, 1.00, -0.58);
+const headrest = addBox(f1Fallback, "f1_headrest", new THREE.BoxGeometry(0.70, 0.30, 0.38), blackMat, 0, 1.18, -0.05);
 const halo = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.055, 12, 34, Math.PI*1.34), carbonMat);
 halo.name = "f1_halo";
 halo.rotation.x = Math.PI/2;
 halo.rotation.z = Math.PI*0.03;
 halo.position.set(0, 1.26, -0.55);
 halo.castShadow = true;
-f1.add(halo);
-addBox(f1, "f1_halo_center_stem", new THREE.BoxGeometry(0.12, 0.45, 0.12), carbonMat, 0, 1.06, -0.33);
-addBox(f1, "f1_halo_left_mount", new THREE.BoxGeometry(0.10, 0.30, 0.12), carbonMat, -0.58, 1.07, -0.48);
-addBox(f1, "f1_halo_right_mount", new THREE.BoxGeometry(0.10, 0.30, 0.12), carbonMat,  0.58, 1.07, -0.48);
+f1Fallback.add(halo);
+addBox(f1Fallback, "f1_halo_center_stem", new THREE.BoxGeometry(0.12, 0.45, 0.12), carbonMat, 0, 1.06, -0.33);
+addBox(f1Fallback, "f1_halo_left_mount", new THREE.BoxGeometry(0.10, 0.30, 0.12), carbonMat, -0.58, 1.07, -0.48);
+addBox(f1Fallback, "f1_halo_right_mount", new THREE.BoxGeometry(0.10, 0.30, 0.12), carbonMat,  0.58, 1.07, -0.48);
 
-const mirrorL = addBox(f1, "f1_mirror_L", new THREE.BoxGeometry(0.36, 0.13, 0.10), carbonMat, -1.08, 1.12, -0.72);
-const mirrorR = addBox(f1, "f1_mirror_R", new THREE.BoxGeometry(0.36, 0.13, 0.10), carbonMat,  1.08, 1.12, -0.72);
-addBox(f1, "f1_tcam", new THREE.BoxGeometry(0.16, 0.16, 0.34), bodyDark, 0, 1.76, 0.88);
+const mirrorL = addBox(f1Fallback, "f1_mirror_L", new THREE.BoxGeometry(0.36, 0.13, 0.10), carbonMat, -1.08, 1.12, -0.72);
+const mirrorR = addBox(f1Fallback, "f1_mirror_R", new THREE.BoxGeometry(0.36, 0.13, 0.10), carbonMat,  1.08, 1.12, -0.72);
+addBox(f1Fallback, "f1_tcam", new THREE.BoxGeometry(0.16, 0.16, 0.34), bodyDark, 0, 1.76, 0.88);
 
 // Rear aero
-const rwMain = addBox(f1, "f1_rear_wing_main", new THREE.BoxGeometry(3.10, 0.14, 0.58), carbonMat, 0, 1.30, 3.72);
-const rwDrs  = addBox(f1, "f1_rear_wing_drs",  new THREE.BoxGeometry(2.82, 0.10, 0.45), bodyPaint, 0, 1.55, 3.88);
-const rwBeam = addBox(f1, "f1_rear_beam_wing", new THREE.BoxGeometry(2.45, 0.08, 0.42), carbonMat, 0, 0.80, 3.48);
-addBox(f1, "f1_rear_endplate_L", new THREE.BoxGeometry(0.12, 1.10, 0.82), carbonMat, -1.55, 1.24, 3.74);
-addBox(f1, "f1_rear_endplate_R", new THREE.BoxGeometry(0.12, 1.10, 0.82), carbonMat,  1.55, 1.24, 3.74);
-addBox(f1, "f1_diffuser", new THREE.BoxGeometry(2.25, 0.22, 0.90), carbonMat, 0, 0.56, 3.32);
+const rwMain = addBox(f1Fallback, "f1_rear_wing_main", new THREE.BoxGeometry(3.10, 0.14, 0.58), carbonMat, 0, 1.30, 3.72);
+const rwDrs  = addBox(f1Fallback, "f1_rear_wing_drs",  new THREE.BoxGeometry(2.82, 0.10, 0.45), bodyPaint, 0, 1.55, 3.88);
+const rwBeam = addBox(f1Fallback, "f1_rear_beam_wing", new THREE.BoxGeometry(2.45, 0.08, 0.42), carbonMat, 0, 0.80, 3.48);
+addBox(f1Fallback, "f1_rear_endplate_L", new THREE.BoxGeometry(0.12, 1.10, 0.82), carbonMat, -1.55, 1.24, 3.74);
+addBox(f1Fallback, "f1_rear_endplate_R", new THREE.BoxGeometry(0.12, 1.10, 0.82), carbonMat,  1.55, 1.24, 3.74);
+addBox(f1Fallback, "f1_diffuser", new THREE.BoxGeometry(2.25, 0.22, 0.90), carbonMat, 0, 0.56, 3.32);
 
 // Steering wheel (visible in cockpit)
 const steering = new THREE.Group();
@@ -2817,9 +2823,9 @@ const wheelGroups = [];
 function addSuspensionArm(x,z,front=true){
   const xSign = Math.sign(x);
   const anchorZ = front ? -1.55 : 1.25;
-  const arm1 = addBox(f1, "f1_suspension_arm", new THREE.BoxGeometry(1.28, 0.045, 0.055), carbonMat, x*0.55, 0.82, (z+anchorZ)/2);
+  const arm1 = addBox(f1Fallback, "f1_suspension_arm", new THREE.BoxGeometry(1.28, 0.045, 0.055), carbonMat, x*0.55, 0.82, (z+anchorZ)/2);
   arm1.rotation.y = xSign * 0.28;
-  const arm2 = addBox(f1, "f1_suspension_arm", new THREE.BoxGeometry(1.28, 0.045, 0.055), carbonMat, x*0.55, 0.62, (z+anchorZ)/2);
+  const arm2 = addBox(f1Fallback, "f1_suspension_arm", new THREE.BoxGeometry(1.28, 0.045, 0.055), carbonMat, x*0.55, 0.62, (z+anchorZ)/2);
   arm2.rotation.y = xSign * 0.18;
 }
 function addWheel(x,z,front=false){
@@ -2843,7 +2849,7 @@ function addWheel(x,z,front=false){
     g.add(groove);
   }
   g.position.set(x, 0.62, z);
-  f1.add(g);
+  f1Fallback.add(g);
   addSuspensionArm(x,z,front);
   if(front){
     const winglet = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.055, 0.62), carbonMat);
@@ -2860,6 +2866,10 @@ const wFR = addWheel( 1.66, -2.05, true);
 const wBL = addWheel(-1.74,  2.10, false);
 const wBR = addWheel( 1.74,  2.10, false);
 
+// ===== REAL F1 GLB ASSET — declarations (must be before applyCarPaint) =====
+let realF1Model = null;
+let realF1Loaded = false;
+
 // Paint apply
 function applyCarPaint(){
   const team = TEAM_LIST.find(t=>t.id===SAVE.teamId) || TEAM_LIST[0];
@@ -2867,28 +2877,30 @@ function applyCarPaint(){
   // Keep wings dark like carbon but put small team color elements on DRS/front flap.
   if(typeof fwFlap1 !== "undefined") fwFlap1.material = bodyPaint;
   if(typeof rwDrs !== "undefined") rwDrs.material = bodyPaint;
+  // Also recolor the GLB model if it is already loaded
+  if(realF1Loaded && realF1Model){
+    const col = new THREE.Color(team.color);
+    realF1Model.traverse((obj)=>{
+      if(obj.isMesh){
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        for(const m of mats){ if(m && m.color){ m.color.copy(col); m.needsUpdate = true; } }
+      }
+    });
+  }
 }
 applyCarPaint();
 
 // ===== REAL F1 GLB ASSET WIRED INTO THE FULL RACING GAME =====
 // Physics, multiplayer sync, collisions, cockpit camera, and Render hosting still use `car`.
 // The downloaded GLB is attached as the visual model inside `f1`.
-let realF1Model = null;
-let realF1Loaded = false;
 const realF1Loader = new GLTFLoader();
 
 function applyRealF1Visibility(onCockpit=false){
   if(!realF1Loaded || !realF1Model) return;
-  // Only iterate direct children of f1 — never touch GLB descendants.
-  for(const child of f1.children){
-    if(child === realF1Model){
-      child.visible = true;          // always show the GLB root
-    } else if(child === steering){
-      child.visible = onCockpit;     // steering wheel only in cockpit view
-    } else {
-      child.visible = false;         // hide every procedural fallback piece
-    }
-  }
+  // The fallback group is hidden permanently once GLB loads.
+  f1Fallback.visible = false;
+  realF1Model.visible = true;
+  steering.visible = onCockpit;
 }
 
 realF1Loader.load(
@@ -2908,17 +2920,43 @@ realF1Loader.load(
     // Lift slightly so the car sits on the track surface (not clipping through ground)
     realF1Model.position.set(0, 0.0, 0);
 
+    // Get the team color for painting the GLB
+    const _team = TEAM_LIST.find(t=>t.id===SAVE.teamId) || TEAM_LIST[0];
+    const _teamColor = new THREE.Color(_team.color);
+
     realF1Model.traverse((obj) => {
       if(obj.isMesh){
         obj.castShadow = true;
         obj.receiveShadow = true;
-        if(obj.material) obj.material.needsUpdate = true;
+        obj.frustumCulled = false;
+        // Replace MeshPhysicalMaterial with MeshStandardMaterial so it works
+        // with the scene's existing ambient + directional lighting setup.
+        // MeshPhysicalMaterial needs envMap/IBL to show color; Standard does not.
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        const newMats = mats.map(m => {
+          const s = new THREE.MeshStandardMaterial({
+            color: _teamColor.clone(),
+            roughness: 0.35,
+            metalness: 0.6,
+            side: THREE.DoubleSide
+          });
+          return s;
+        });
+        obj.material = newMats.length === 1 ? newMats[0] : newMats;
       }
     });
 
     f1.add(realF1Model);
     realF1Loaded = true;
-    applyRealF1Visibility(viewMode === 2);
+
+    // Hide the entire procedural fallback group with one line.
+    // All wFL/wFR/wBL/wBR/steering references in stepDriving still work fine
+    // because the objects still exist in memory — they just don't render.
+    f1Fallback.visible = false;
+
+    // Steering wheel hidden by default (shown only in cockpit view)
+    steering.visible = (viewMode === 2);
+
     toastMsg("Real F1 model loaded");
   },
   undefined,
@@ -3419,7 +3457,8 @@ function setCockpitVisibility(on){
 
   // Fallback procedural cockpit view if the GLB file is missing.
   // Realistic F1 cockpit view: show halo, nose, mirrors, steering wheel, and front wheels.
-  for(const child of f1.children){
+  f1Fallback.visible = true;
+  for(const child of f1Fallback.children){
     if(!on){ child.visible = true; continue; }
     const n = child.name || "";
     child.visible =
@@ -4180,6 +4219,10 @@ function loop(now){
     for(const b of bots) updateBot(b, dt, now);
     stepDriving(dt, now);
   }
+
+  // GUARANTEE: if the real GLB is loaded, the procedural fallback is NEVER visible.
+  // This overrides any accidental visibility set during the loading window.
+  if(realF1Loaded) f1Fallback.visible = false;
 
   updateFX(dt);
   renderer.render(scene, camera);
